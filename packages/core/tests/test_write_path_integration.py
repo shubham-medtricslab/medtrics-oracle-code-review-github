@@ -232,14 +232,13 @@ class TestDetectorAndWriterAgreeOnLineNumbers(unittest.TestCase):
         for _p, line, text in iter_added_lines(self.pr):
             self.assertIn(line, commentable, f"{line}: {text!r}")
 
-    @unittest.expectedFailure
     def test_the_rulepack_detector_walk_agrees_with_the_unified_walker(self):
-        """KNOWN OPEN DEFECT in `aireview/rulepack/detect.py:45-60`.
+        """FIXED. Was a live defect in `aireview/rulepack/detect.py`.
 
-        That function is a verbatim carry-forward of the v0.5.0 detector
-        walk, so the divergence the unified walker exists to remove is still
-        live - just in a different file from the one it was fixed in. On the
-        hunk above:
+        That module carried the v0.5.0 detector walk verbatim, so once the
+        writer's walk was corrected the two disagreed - the divergence the
+        unified walker exists to remove had simply moved file. On the hunk
+        above the old walk produced:
 
             detector walk : [(43, '  const x: any = 1;'),
                              (44, "  console.log('debug');")]
@@ -247,29 +246,25 @@ class TestDetectorAndWriterAgreeOnLineNumbers(unittest.TestCase):
                              (42, '  const x: any = 1;'),
                              (43, "  console.log('debug');")]
 
-        Two consequences, and the second is the dangerous one:
+        `++attempts;` was never yielded, because
+        `startswith("+") and not startswith("+++")` excluded it, so no
+        detector could fire on a line beginning '++'. And `---legacy;`, a
+        REMOVED line, failed the `not startswith("---")` guard, fell through
+        to the context branch and advanced the new-file counter, shifting
+        everything after it.
 
-          * `++attempts;` is never yielded at all, because
-            `raw.startswith("+") and not raw.startswith("+++")` excludes it,
-            so no detector can ever fire on a line beginning '++'.
-          * `---legacy;` is a REMOVED line, but it fails the
-            `not raw.startswith("---")` guard, falls through to the context
-            branch and advances the new-file counter. Everything after it is
-            off by one.
+        The off-by-one did not raise. Both 43 and 44 are in the writer's
+        commentable set, so GitHub would accept the comment and place it on
+        the wrong line of code under the bot's name, silently - strictly
+        worse than the v0.5.0 bug it descended from, because a correct writer
+        no longer rejects the bad position. Fixing one of two disagreeing
+        walks is less safe than fixing neither.
 
-        The off-by-one does not raise. Lines 43 and 44 are both in the
-        writer's commentable set, so GitHub accepts the comment and it lands
-        on the wrong line of code, under the bot's name, with nothing
-        anywhere reporting a problem. It is strictly worse than the v0.5.0
-        bug it descends from, because the writer half is now correct and no
-        longer rejects the bad position.
-
-        Marked `expectedFailure` rather than left red: `rulepack/` is not my
-        area, so this records the defect without blocking integration on a
-        fix I should not be making. The repair is to call
-        `aireview.github.hunks.iter_added_lines` instead of keeping a second
-        copy of the walk. WHEN THAT LANDS THIS BECOMES AN UNEXPECTED SUCCESS
-        AND THE SUITE GOES RED - remove the decorator then.
+        Found and reported by the write-path workstream against another
+        workstream's file, recorded here as `expectedFailure` rather than
+        fixed across an ownership boundary. `detect.py` now delegates to
+        `iter_added_lines` and the decorator is gone. Leave this test
+        undecorated: it is what stops a second walk being reintroduced.
         """
         from aireview.rulepack.detect import added_lines
         self.assertEqual(

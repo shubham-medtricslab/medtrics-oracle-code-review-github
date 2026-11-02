@@ -370,7 +370,14 @@ class TestSelftestParity(unittest.TestCase):
 
 
 class TestAddedLineWalk(unittest.TestCase):
-    """Line numbering must match v0.5.0 or every finding anchors wrongly."""
+    """Line numbering must match the writer's walk, or findings anchor wrongly.
+
+    Originally this class pinned parity with v0.5.0. That was the right instinct
+    and the wrong reference point: v0.5.0's detector walk and its writer walk
+    disagreed, which is the defect, so matching one of them guarantees
+    disagreeing with the other. `added_lines` now delegates to the single shared
+    walker in `aireview.github.hunks` and these assert that behaviour.
+    """
 
     def test_removed_lines_do_not_advance_the_new_counter(self):
         pr = {"diffs": [{"file_new_path": "a.ts", "hunks": [{
@@ -379,12 +386,42 @@ class TestAddedLineWalk(unittest.TestCase):
         }]}]}
         self.assertEqual(list(added_lines(pr)), [("a.ts", 11, "added")])
 
-    def test_the_file_header_line_is_not_treated_as_an_addition(self):
+
+    def test_a_plus_plus_line_is_content_not_a_file_header(self):
+        """`+++` inside a hunk is an added line whose source begins `++`.
+
+        GitHub's `/pulls/{n}/files` `patch` field begins at `@@` and carries no
+        `---`/`+++` file headers - the filename is a sibling field. Verified
+        against the captured fixtures: every patch starts `@@` and none contains
+        a `+++` line. So treating `+++` as a header, as v0.5.0 did, makes it
+        impossible for any detector to fire on a line starting `++` and shifts
+        the counter after any removed line starting `--`.
+
+        Not hypothetical: a markdown file documenting a diff, or a `.patch`
+        fixture, contains exactly these lines. This repository now has several.
+        """
         pr = {"diffs": [{"file_new_path": "a.ts", "hunks": [{
-            "line_range_new": [1, 1],
-            "unified_text": "@@ -0,0 +1 @@\n+++ b/a.ts\n+real",
+            "line_range_new": [1, 2],
+            "unified_text": "@@ -0,0 +1,2 @@\n+++ b/a.ts\n+real",
         }]}]}
-        self.assertEqual([t for _, _, t in added_lines(pr)], ["real"])
+        self.assertEqual(
+            [(line, text) for _, line, text in added_lines(pr)],
+            [(1, "++ b/a.ts"), (2, "real")],
+        )
+
+    def test_added_lines_agrees_with_the_writer(self):
+        """The detector and the writer must never disagree about a line number.
+
+        A detector number the writer's commentable set happens to accept puts a
+        comment on the wrong line of code, under the bot's name, silently.
+        """
+        from aireview.github.hunks import iter_added_lines
+        pr = {"diffs": [{"file_new_path": "a.ts", "hunks": [{
+            "line_range_new": [40, 5], "line_range_old": [40, 3],
+            "unified_text": "@@ -40,3 +40,5 @@\n ctx\n---legacy;\n"
+                            "+++attempts;\n+  const x = 1;\n ctx",
+        }]}]}
+        self.assertEqual(list(added_lines(pr)), list(iter_added_lines(pr)))
 
     def test_old_path_is_used_when_there_is_no_new_path(self):
         pr = {"diffs": [{"file_old_path": "gone.ts", "hunks": [{

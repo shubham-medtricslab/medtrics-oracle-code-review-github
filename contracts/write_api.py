@@ -123,7 +123,8 @@ def validate_agent_output(
 # --------------------------------------------------------------------------- #
 # 3. Dedup - content-anchored, not position-anchored
 # --------------------------------------------------------------------------- #
-def dedup_key(*, path: str, principle_id: str, evidence: str) -> str:
+def dedup_key(*, path: str, principle_id: str, evidence: str,
+              detector_key: Optional[str] = None) -> str:
     """Stable across pushes that move the finding.
 
     MUST NOT include a line number: a line-anchored key reclassifies every
@@ -131,6 +132,19 @@ def dedup_key(*, path: str, principle_id: str, evidence: str) -> str:
     every push. MUST NOT include rulepack_version: that would re-key every
     finding on every open PR when a pack is bumped. Version is carried as a
     separate field, so a bump is a migration rather than a mass re-post.
+
+    `detector_key` (contract v1.4) separates two detectors that legitimately
+    emit one principle id - the FA-009 case. Without it they stay distinct only
+    while their evidence differs, which is incidental rather than structural.
+
+    Omitting it MUST produce a byte-identical key, so adding it is not itself a
+    re-keying event.
+
+    The accepted cost: renaming a detector re-keys and re-posts, which is the
+    very failure mode that keeping `rulepack_version` out avoids. Accepted
+    because detector keys change rarely and versions change every release - but
+    it is a real trade, not a free win, and renaming a detector should be
+    treated as a migration.
     """
     raise NotImplementedError
 

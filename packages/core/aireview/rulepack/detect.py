@@ -15,10 +15,27 @@ Behaviour kept identical to v0.5.0 on purpose:
 * a finding is a candidate, not a verdict - the reviewer agent confirms or
   rejects it
 
-The one behavioural change is that `exclude_globs` is honoured, which is what
-makes FA-010 stop firing on `*.service.ts`.
+Two behavioural changes. `exclude_globs` is honoured, which is what makes
+FA-010 stop firing on `*.service.ts`. And line numbering now comes from the
+shared walker in `aireview.github.hunks` rather than a second local copy.
+
+That second point is not tidying. This module originally carried v0.5.0's walk
+verbatim, so after the writer's walk was fixed the two disagreed - and a
+disagreement here is worse than the original bug. A detector line number that
+the writer's `commentable_lines` happens to accept produces a comment posted on
+the wrong line of code, under the bot's name, with nothing raised. v0.5.0 was
+partly protected by the writer rejecting bad positions; a correct writer waves
+them straight through. Fixing one of two disagreeing walks is less safe than
+fixing neither.
+
+Concretely, the old walk excluded any added line whose source began `++`
+(`startswith("+") and not startswith("+++")`), so no detector could ever fire
+on one, and a removed line beginning `--` fell through to the context branch
+and advanced the new-file counter, shifting everything after it.
 """
 import re
+
+from ..github.hunks import iter_added_lines
 
 _FLAGS = {
     "IGNORECASE": re.IGNORECASE,
@@ -43,21 +60,13 @@ def compile_detector(detector):
 
 
 def added_lines(prfetch):
-    """Yield (path, new_line_no, text) for every added line in the diff."""
-    for diff in prfetch.get("diffs", []):
-        path = diff.get("file_new_path") or diff.get("file_old_path")
-        for hunk in diff.get("hunks", []):
-            new_no = (hunk.get("line_range_new") or [0, 0])[0]
-            for raw in (hunk.get("unified_text") or "").split("\n"):
-                if raw.startswith("@@"):
-                    continue
-                if raw.startswith("+") and not raw.startswith("+++"):
-                    yield path, new_no, raw[1:]
-                    new_no += 1
-                elif raw.startswith("-") and not raw.startswith("---"):
-                    continue
-                else:
-                    new_no += 1
+    """Yield (path, new_line_no, text) for every added line in the diff.
+
+    Delegates to the single shared walker. Kept as a named function because it
+    is the detector stage's vocabulary, but it must never grow its own walk
+    again - see the module docstring.
+    """
+    return iter_added_lines(prfetch)
 
 
 def finding(detector, path, line, text):
