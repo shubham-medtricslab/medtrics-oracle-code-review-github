@@ -1,0 +1,572 @@
+{
+  "id": "react-ts",
+  "version": "1.0.0",
+  "description": "React, TypeScript and browser-frontend rules.",
+  "requires": [
+    "base"
+  ],
+  "rules": [
+    {
+      "id": "FA-001",
+      "category": "frontend-architecture",
+      "title": "Component-driven: small, focused, single-responsibility components",
+      "enforcement": "established",
+      "detect": "Apply catalog rule FA-001 (\"Component-driven: small, focused, single-responsibility components\") to the changed hunks; cite file and line for every finding."
+    },
+    {
+      "id": "FA-002",
+      "category": "frontend-architecture",
+      "title": "Design tokens via Tailwind + CSS variables — no hardcoded colors",
+      "enforcement": "established",
+      "detect": "Apply catalog rule FA-002 (\"Design tokens via Tailwind + CSS variables — no hardcoded colors\") to the changed hunks; cite file and line for every finding."
+    },
+    {
+      "id": "FA-003",
+      "category": "frontend-architecture",
+      "title": "shadcn/ui as the base — extend with variants, never fork",
+      "enforcement": "established",
+      "detect": "Apply catalog rule FA-003 (\"shadcn/ui as the base — extend with variants, never fork\") to the changed hunks; cite file and line for every finding."
+    },
+    {
+      "id": "FA-004",
+      "category": "frontend-architecture",
+      "title": "Consistent naming: PascalCase components, camelCase hooks",
+      "enforcement": "established",
+      "detect": "Apply catalog rule FA-004 (\"Consistent naming: PascalCase components, camelCase hooks\") to the changed hunks; cite file and line for every finding."
+    },
+    {
+      "id": "FA-005",
+      "category": "frontend-architecture",
+      "title": "Barrel exports per feature folder, not per file",
+      "enforcement": "established",
+      "detect": "Apply catalog rule FA-005 (\"Barrel exports per feature folder, not per file\") to the changed hunks; cite file and line for every finding."
+    },
+    {
+      "id": "FA-011",
+      "category": "frontend-architecture",
+      "title": "Magic Values from Constants",
+      "enforcement": "established",
+      "detect": "Apply catalog rule FA-011 (\"Magic Values from Constants\") to the changed hunks; cite file and line for every finding."
+    },
+    {
+      "id": "FA-017",
+      "category": "frontend-architecture",
+      "title": "Atomic Design Enforcement",
+      "enforcement": "established",
+      "detect": "Apply catalog rule FA-017 (\"Atomic Design Enforcement\") to the changed hunks; cite file and line for every finding."
+    },
+    {
+      "id": "FA-020",
+      "category": "frontend-architecture",
+      "title": "Hook Rules (toast/invalidate/enabled/memo)",
+      "enforcement": "established",
+      "detect": "Apply catalog rule FA-020 (\"Hook Rules (toast/invalidate/enabled/memo)\") to the changed hunks; cite file and line for every finding."
+    },
+    {
+      "id": "FA-026",
+      "category": "frontend-architecture",
+      "title": "ConfirmDialog for Destructive Actions",
+      "enforcement": "established",
+      "diff_checkable": "yes",
+      "detect": "Apply catalog rule FA-026 (\"ConfirmDialog for Destructive Actions\") to the changed hunks; cite file and line for every finding."
+    },
+    {
+      "id": "FA-027",
+      "category": "frontend-architecture",
+      "title": "Promotion Checklist (Molecule → Organism)",
+      "enforcement": "established",
+      "detect": "Apply catalog rule FA-027 (\"Promotion Checklist (Molecule → Organism)\") to the changed hunks; cite file and line for every finding."
+    },
+    {
+      "id": "TS-002",
+      "category": "typescript-standards",
+      "title": "Strict mode enabled — no any, no ts-ignore without justification",
+      "enforcement": "partial",
+      "detect": "Apply catalog rule TS-002 (\"Strict mode enabled — no any, no ts-ignore without justification\") to the changed hunks; cite file and line for every finding."
+    },
+    {
+      "id": "TS-003",
+      "category": "typescript-standards",
+      "title": "Zod schemas for all external data (API responses, form inputs)",
+      "enforcement": "missing",
+      "detect": "Apply catalog rule TS-003 (\"Zod schemas for all external data (API responses, form inputs)\") to the changed hunks; cite file and line for every finding."
+    },
+    {
+      "id": "TS-004",
+      "category": "typescript-standards",
+      "title": "Shared types package across products where applicable",
+      "enforcement": "missing",
+      "detect": "Apply catalog rule TS-004 (\"Shared types package across products where applicable\") to the changed hunks; cite file and line for every finding."
+    },
+    {
+      "id": "TS-005",
+      "category": "typescript-standards",
+      "title": "Discriminated unions over optional fields for state modeling",
+      "enforcement": "established",
+      "detect": "Apply catalog rule TS-005 (\"Discriminated unions over optional fields for state modeling\") to the changed hunks; cite file and line for every finding."
+    },
+    {
+      "id": "TS-006",
+      "category": "typescript-standards",
+      "title": "Exhaustive switch/case with never for type safety",
+      "enforcement": "established",
+      "detect": "Apply catalog rule TS-006 (\"Exhaustive switch/case with never for type safety\") to the changed hunks; cite file and line for every finding."
+    },
+    {
+      "id": "TS-009",
+      "category": "typescript-standards",
+      "title": "Banned Patterns (Pre-Commit): any, console.log, TODO/FIXME",
+      "enforcement": "established",
+      "diff_checkable": "yes",
+      "detect": "Apply catalog rule TS-009 (\"Banned Patterns (Pre-Commit): any, console.log, TODO/FIXME\") to the changed hunks; cite file and line for every finding."
+    },
+    {
+      "id": "TS-010",
+      "category": "typescript-standards",
+      "title": "No Console Statements (ESLint Enforced)",
+      "enforcement": "established",
+      "diff_checkable": "yes",
+      "detect": "Apply catalog rule TS-010 (\"No Console Statements (ESLint Enforced)\") to the changed hunks; cite file and line for every finding."
+    },
+    {
+      "id": "TS-013",
+      "category": "typescript-standards",
+      "title": "Broken Re-Exports Detection",
+      "enforcement": "established",
+      "detect": "Apply catalog rule TS-013 (\"Broken Re-Exports Detection\") to the changed hunks; cite file and line for every finding."
+    },
+    {
+      "id": "TS-014",
+      "category": "typescript-standards",
+      "title": "Dead Code Checklist",
+      "enforcement": "established",
+      "detect": "Apply catalog rule TS-014 (\"Dead Code Checklist\") to the changed hunks; cite file and line for every finding."
+    },
+    {
+      "id": "TS-015",
+      "category": "typescript-standards",
+      "title": "Missing Imports Detection",
+      "enforcement": "missing",
+      "detect": "Apply catalog rule TS-015 (\"Missing Imports Detection\") to the changed hunks; cite file and line for every finding."
+    },
+    {
+      "id": "TS-016",
+      "category": "typescript-standards",
+      "title": "Redundant Type Fields",
+      "enforcement": "established",
+      "detect": "Apply catalog rule TS-016 (\"Redundant Type Fields\") to the changed hunks; cite file and line for every finding."
+    },
+    {
+      "id": "TS-017",
+      "category": "typescript-standards",
+      "title": "Status Transition Validation",
+      "enforcement": "established",
+      "detect": "Apply catalog rule TS-017 (\"Status Transition Validation\") to the changed hunks; cite file and line for every finding."
+    },
+    {
+      "id": "TS-018",
+      "category": "typescript-standards",
+      "title": "Retry-Worthy vs Permanent Error Distinction",
+      "enforcement": "established",
+      "detect": "Apply catalog rule TS-018 (\"Retry-Worthy vs Permanent Error Distinction\") to the changed hunks; cite file and line for every finding."
+    },
+    {
+      "id": "TS-019",
+      "category": "typescript-standards",
+      "title": "Per-Call Constant Allocation",
+      "enforcement": "established",
+      "detect": "Apply catalog rule TS-019 (\"Per-Call Constant Allocation\") to the changed hunks; cite file and line for every finding."
+    },
+    {
+      "id": "TS-020",
+      "category": "typescript-standards",
+      "title": "Ignored Function Parameters",
+      "enforcement": "established",
+      "detect": "Apply catalog rule TS-020 (\"Ignored Function Parameters\") to the changed hunks; cite file and line for every finding."
+    },
+    {
+      "id": "TS-021",
+      "category": "typescript-standards",
+      "title": "Magic Value Constants",
+      "enforcement": "established",
+      "diff_checkable": "yes",
+      "detect": "Apply catalog rule TS-021 (\"Magic Value Constants\") to the changed hunks; cite file and line for every finding."
+    },
+    {
+      "id": "UX-003",
+      "category": "ux-accessibility",
+      "title": "Optimistic UI updates with rollback on failure",
+      "enforcement": "missing",
+      "detect": "Apply catalog rule UX-003 (\"Optimistic UI updates with rollback on failure\") to the changed hunks; cite file and line for every finding."
+    },
+    {
+      "id": "UX-016",
+      "category": "ux-accessibility",
+      "title": "Design System Tokens (Extended)",
+      "enforcement": "established",
+      "detect": "Apply catalog rule UX-016 (\"Design System Tokens (Extended)\") to the changed hunks; cite file and line for every finding."
+    },
+    {
+      "id": "UX-018",
+      "category": "ux-accessibility",
+      "title": "Toast/Feedback Rules (Extended)",
+      "enforcement": "established",
+      "detect": "Apply catalog rule UX-018 (\"Toast/Feedback Rules (Extended)\") to the changed hunks; cite file and line for every finding."
+    },
+    {
+      "id": "UX-019",
+      "category": "ux-accessibility",
+      "title": "Query State Handling",
+      "enforcement": "established",
+      "detect": "Apply catalog rule UX-019 (\"Query State Handling\") to the changed hunks; cite file and line for every finding."
+    },
+    {
+      "id": "PERF-001",
+      "category": "performance",
+      "title": "Code splitting per route with React.lazy + Suspense",
+      "enforcement": "established",
+      "detect": "Apply catalog rule PERF-001 (\"Code splitting per route with React.lazy + Suspense\") to the changed hunks; cite file and line for every finding."
+    },
+    {
+      "id": "PERF-003",
+      "category": "performance",
+      "title": "React Query for server state — no useEffect fetch patterns",
+      "enforcement": "established",
+      "detect": "Apply catalog rule PERF-003 (\"React Query for server state — no useEffect fetch patterns\") to the changed hunks; cite file and line for every finding."
+    },
+    {
+      "id": "PERF-004",
+      "category": "performance",
+      "title": "Memoize expensive computations — profile before optimizing",
+      "enforcement": "established",
+      "detect": "Apply catalog rule PERF-004 (\"Memoize expensive computations — profile before optimizing\") to the changed hunks; cite file and line for every finding."
+    },
+    {
+      "id": "PERF-006",
+      "category": "performance",
+      "title": "Virtualization (50+ items → react-virtual)",
+      "enforcement": "established",
+      "detect": "Apply catalog rule PERF-006 (\"Virtualization (50+ items → react-virtual)\") to the changed hunks; cite file and line for every finding."
+    },
+    {
+      "id": "PERF-007",
+      "category": "performance",
+      "title": "Dynamic Imports (heavy libs → await import())",
+      "enforcement": "established",
+      "detect": "Apply catalog rule PERF-007 (\"Dynamic Imports (heavy libs → await import())\") to the changed hunks; cite file and line for every finding."
+    },
+    {
+      "id": "PERF-008",
+      "category": "performance",
+      "title": "Query Performance (gate closed dialogs, smart retry, debounce)",
+      "enforcement": "established",
+      "detect": "Apply catalog rule PERF-008 (\"Query Performance (gate closed dialogs, smart retry, debounce)\") to the changed hunks; cite file and line for every finding."
+    },
+    {
+      "id": "PERF-009",
+      "category": "performance",
+      "title": "Layout Performance",
+      "enforcement": "established",
+      "detect": "Apply catalog rule PERF-009 (\"Layout Performance\") to the changed hunks; cite file and line for every finding."
+    },
+    {
+      "id": "PERF-010",
+      "category": "performance",
+      "title": "Anti-Patterns (index keys, unstable props)",
+      "enforcement": "established",
+      "detect": "Apply catalog rule PERF-010 (\"Anti-Patterns (index keys, unstable props)\") to the changed hunks; cite file and line for every finding."
+    },
+    {
+      "id": "PERF-012",
+      "category": "performance",
+      "title": "Memory Leak Prevention",
+      "enforcement": "established",
+      "detect": "Apply catalog rule PERF-012 (\"Memory Leak Prevention\") to the changed hunks; cite file and line for every finding."
+    },
+    {
+      "id": "PERF-013",
+      "category": "performance",
+      "title": "Form Performance",
+      "enforcement": "established",
+      "detect": "Apply catalog rule PERF-013 (\"Form Performance\") to the changed hunks; cite file and line for every finding."
+    },
+    {
+      "id": "PERF-015",
+      "category": "performance",
+      "title": "Route Preloading",
+      "enforcement": "established",
+      "detect": "Apply catalog rule PERF-015 (\"Route Preloading\") to the changed hunks; cite file and line for every finding."
+    },
+    {
+      "id": "PERF-016",
+      "category": "performance",
+      "title": "Context Performance",
+      "enforcement": "established",
+      "detect": "Apply catalog rule PERF-016 (\"Context Performance\") to the changed hunks; cite file and line for every finding."
+    },
+    {
+      "id": "PERF-022",
+      "category": "performance",
+      "title": "QueryKey / dependency-array stability — no fresh references per render",
+      "enforcement": "established",
+      "diff_checkable": "yes",
+      "detect": "Apply catalog rule PERF-022 (\"QueryKey / dependency-array stability — no fresh references per render\") to the changed hunks; cite file and line for every finding."
+    },
+    {
+      "id": "PERF-023",
+      "category": "performance",
+      "title": "QueryKey stability — detection via context-grep and default-prop scanning",
+      "enforcement": "established",
+      "diff_checkable": "yes",
+      "detect": "Apply catalog rule PERF-023 (\"QueryKey stability — detection via context-grep and default-prop scanning\") to the changed hunks; cite file and line for every finding."
+    },
+    {
+      "id": "A11Y-010",
+      "category": "accessibility-wcag",
+      "title": "Dialog/Sheet Accessibility",
+      "enforcement": "established",
+      "detect": "Apply catalog rule A11Y-010 (\"Dialog/Sheet Accessibility\") to the changed hunks; cite file and line for every finding."
+    },
+    {
+      "id": "A11Y-023",
+      "category": "accessibility-wcag",
+      "title": "No Raw i18n Keys Visible",
+      "enforcement": "established",
+      "diff_checkable": "yes",
+      "detect": "Apply catalog rule A11Y-023 (\"No Raw i18n Keys Visible\") to the changed hunks; cite file and line for every finding."
+    },
+    {
+      "id": "MOB-012",
+      "category": "mobile-best-practices",
+      "title": "React Native Readiness Conventions",
+      "enforcement": "established",
+      "detect": "Apply catalog rule MOB-012 (\"React Native Readiness Conventions\") to the changed hunks; cite file and line for every finding."
+    },
+    {
+      "id": "MOB-013",
+      "category": "mobile-best-practices",
+      "title": "React Native Readiness ESLint Enforcement",
+      "enforcement": "established",
+      "detect": "Apply catalog rule MOB-013 (\"React Native Readiness ESLint Enforcement\") to the changed hunks; cite file and line for every finding."
+    },
+    {
+      "id": "MOB-016",
+      "category": "mobile-best-practices",
+      "title": "autoFocus Guard",
+      "enforcement": "established",
+      "detect": "Apply catalog rule MOB-016 (\"autoFocus Guard\") to the changed hunks; cite file and line for every finding."
+    },
+    {
+      "id": "MOB-018",
+      "category": "mobile-best-practices",
+      "title": "Mobile Dialog Conventions",
+      "enforcement": "established",
+      "detect": "Apply catalog rule MOB-018 (\"Mobile Dialog Conventions\") to the changed hunks; cite file and line for every finding."
+    },
+    {
+      "id": "MOB-022",
+      "category": "mobile-best-practices",
+      "title": "Responsive Table Components",
+      "enforcement": "established",
+      "detect": "Apply catalog rule MOB-022 (\"Responsive Table Components\") to the changed hunks; cite file and line for every finding."
+    },
+    {
+      "id": "I18N-002",
+      "category": "internationalization",
+      "title": "react-i18next or equivalent — no hardcoded English in components",
+      "enforcement": "established",
+      "diff_checkable": "yes",
+      "detect": "Apply catalog rule I18N-002 (\"react-i18next or equivalent — no hardcoded English in components\") to the changed hunks; cite file and line for every finding."
+    },
+    {
+      "id": "I18N-003",
+      "category": "internationalization",
+      "title": "RTL layout support: use logical CSS properties (start/end)",
+      "enforcement": "established",
+      "diff_checkable": "yes",
+      "detect": "Apply catalog rule I18N-003 (\"RTL layout support: use logical CSS properties (start/end)\") to the changed hunks; cite file and line for every finding."
+    },
+    {
+      "id": "I18N-011",
+      "category": "internationalization",
+      "title": "RTL-Sensitive Icon Handling",
+      "enforcement": "established",
+      "detect": "Apply catalog rule I18N-011 (\"RTL-Sensitive Icon Handling\") to the changed hunks; cite file and line for every finding."
+    },
+    {
+      "id": "I18N-012",
+      "category": "internationalization",
+      "title": "Non-English Locale Loading",
+      "enforcement": "established",
+      "detect": "Apply catalog rule I18N-012 (\"Non-English Locale Loading\") to the changed hunks; cite file and line for every finding."
+    },
+    {
+      "id": "I18N-013",
+      "category": "internationalization",
+      "title": "DirectionProvider Context",
+      "enforcement": "established",
+      "detect": "Apply catalog rule I18N-013 (\"DirectionProvider Context\") to the changed hunks; cite file and line for every finding."
+    },
+    {
+      "id": "I18N-016",
+      "category": "internationalization",
+      "title": "Hardcoded Toast Strings",
+      "enforcement": "established",
+      "diff_checkable": "yes",
+      "detect": "Apply catalog rule I18N-016 (\"Hardcoded Toast Strings\") to the changed hunks; cite file and line for every finding."
+    },
+    {
+      "id": "I18N-018",
+      "category": "internationalization",
+      "title": "aria-label i18n",
+      "enforcement": "established",
+      "detect": "Apply catalog rule I18N-018 (\"aria-label i18n\") to the changed hunks; cite file and line for every finding."
+    },
+    {
+      "id": "I18N-020",
+      "category": "internationalization",
+      "title": "Icon Direction Flipping",
+      "enforcement": "established",
+      "detect": "Apply catalog rule I18N-020 (\"Icon Direction Flipping\") to the changed hunks; cite file and line for every finding."
+    },
+    {
+      "id": "I18N-021",
+      "category": "internationalization",
+      "title": "RTL Forbidden Patterns (Complete List)",
+      "enforcement": "established",
+      "diff_checkable": "yes",
+      "detect": "Apply catalog rule I18N-021 (\"RTL Forbidden Patterns (Complete List)\") to the changed hunks; cite file and line for every finding."
+    },
+    {
+      "id": "I18N-022",
+      "category": "internationalization",
+      "title": "RTL Required Replacements",
+      "enforcement": "established",
+      "diff_checkable": "yes",
+      "detect": "Apply catalog rule I18N-022 (\"RTL Required Replacements\") to the changed hunks; cite file and line for every finding."
+    }
+  ],
+  "detectors": [
+    {
+      "key": "i18n-003-rtl-directional-class",
+      "emits_principle_id": "I18N-003",
+      "severity": "high",
+      "pattern": "className\\s*=\\s*[\"`][^\"`]*\\b(?:mr-|ml-|pr-|pl-|text-left|text-right|left-|right-)",
+      "message": "RTL-forbidden directional class — use logical utilities (ms-/me-/ps-/pe-/text-start/text-end).",
+      "include_globs": [
+        "**/*.tsx"
+      ]
+    },
+    {
+      "key": "ts-009-any-type",
+      "emits_principle_id": "TS-009",
+      "severity": "medium",
+      "pattern": "(:\\s*any\\b|\\bas\\s+any\\b)",
+      "message": "`any` type usage — banned pre-commit pattern (TS-009).",
+      "include_globs": [
+        "**/*.ts",
+        "**/*.tsx"
+      ]
+    },
+    {
+      "key": "ts-010-console-statement",
+      "emits_principle_id": "TS-010",
+      "severity": "medium",
+      "pattern": "\\bconsole\\.(log|debug|info|warn|error)\\s*\\(",
+      "message": "console statement — no-console is ESLint-enforced (TS-010); use logger.ts.",
+      "include_globs": [
+        "**/*.ts",
+        "**/*.tsx"
+      ]
+    },
+    {
+      "key": "fa-026-window-confirm",
+      "emits_principle_id": "FA-026",
+      "severity": "high",
+      "pattern": "\\bwindow\\.confirm\\s*\\(",
+      "message": "window.confirm() — use the ConfirmDialog molecule for destructive actions (FA-026).",
+      "include_globs": [
+        "**/*.ts",
+        "**/*.tsx"
+      ]
+    },
+    {
+      "key": "sec-004-hardcoded-secret",
+      "emits_principle_id": "SEC-004",
+      "severity": "high",
+      "pattern": "(SERVICE_ROLE|SUPABASE_SERVICE_ROLE|JWT_SECRET|POSTGRES_PASSWORD)\\s*[:=]\\s*['\\\"][^'\\\"]+",
+      "message": "Possible hardcoded secret — secrets belong in env/secret manager (SEC-004/SEC-017).",
+      "include_globs": [
+        "**/*.ts",
+        "**/*.tsx"
+      ]
+    },
+    {
+      "key": "sec-011-raw-error-message",
+      "emits_principle_id": "SEC-011",
+      "severity": "medium",
+      "pattern": "(showError|toast)\\s*\\([^)]*error\\.message",
+      "message": "Raw error.message surfaced to users — route through sanitizeErrorMessage() (SEC-011/UX-024).",
+      "include_globs": [
+        "**/*.ts",
+        "**/*.tsx"
+      ]
+    },
+    {
+      "key": "i18n-001-hardcoded-jsx-string",
+      "emits_principle_id": "I18N-001",
+      "severity": "medium",
+      "pattern": ">\\s*[A-Z][A-Za-z]{3,}(?:\\s+[A-Za-z]+){0,6}\\s*<",
+      "message": "Possible hardcoded user-facing string in JSX — wrap with t() (I18N-001/002).",
+      "include_globs": [
+        "**/*.tsx"
+      ]
+    },
+    {
+      "key": "perf-022-unstable-query-key",
+      "emits_principle_id": "PERF-022",
+      "severity": "medium",
+      "pattern": "queryKey\\s*:\\s*\\[[^\\]]*(new Date\\(|Date\\.now\\(|\\.map\\(|Object\\.keys\\()",
+      "message": "Unstable queryKey (fresh reference each render) — normalize/memoize (PERF-022).",
+      "include_globs": [
+        "**/*.ts",
+        "**/*.tsx"
+      ]
+    },
+    {
+      "key": "a11y-022-icon-only-button",
+      "emits_principle_id": "A11Y-022",
+      "severity": "medium",
+      "pattern": "<button\\b(?![^>]*aria-label)[^>]*>\\s*<(svg|[A-Z][A-Za-z]*Icon)\\b",
+      "message": "Icon-only button without aria-label (A11Y-022).",
+      "include_globs": [
+        "**/*.tsx"
+      ]
+    }
+  ],
+  "surface_path_globs": {
+    "frontend": [
+      "**/*.tsx",
+      "**/*.jsx",
+      "**/*.css",
+      "**/*.scss"
+    ],
+    "typescript": [
+      "**/*.ts",
+      "**/*.tsx"
+    ],
+    "ux_a11y": [
+      "**/*.tsx",
+      "**/*.jsx",
+      "**/*.css",
+      "**/*.scss"
+    ],
+    "i18n_rtl": [
+      "**/*.ts",
+      "**/*.tsx",
+      "**/*.jsx",
+      "**/locales/**/*.json",
+      "**/i18n/**"
+    ]
+  }
+}

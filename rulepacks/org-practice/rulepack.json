@@ -1,0 +1,760 @@
+{
+  "id": "org-practice",
+  "version": "1.0.0",
+  "description": "Engineering-process rules: testing, documentation, git, devops and AI-agent management. Separate from medtrics-oracle so a repo can adopt process rules without taking on Oracle-specific content.",
+  "requires": [
+    "base"
+  ],
+  "rules": [
+    {
+      "id": "TEST-001",
+      "category": "testing-quality-gates",
+      "title": "Unit tests (Vitest) for business logic; coverage informational",
+      "enforcement": "established",
+      "detect": "Apply catalog rule TEST-001 (\"Unit tests (Vitest) for business logic; coverage informational\") to the changed hunks; cite file and line for every finding."
+    },
+    {
+      "id": "TEST-002",
+      "category": "testing-quality-gates",
+      "title": "Component tests (Testing Library) for behavior, not implementation",
+      "enforcement": "established",
+      "detect": "Apply catalog rule TEST-002 (\"Component tests (Testing Library) for behavior, not implementation\") to the changed hunks; cite file and line for every finding."
+    },
+    {
+      "id": "TEST-003",
+      "category": "testing-quality-gates",
+      "title": "E2E tests (Playwright) for critical user flows",
+      "enforcement": "established",
+      "detect": "Apply catalog rule TEST-003 (\"E2E tests (Playwright) for critical user flows\") to the changed hunks; cite file and line for every finding."
+    },
+    {
+      "id": "TEST-004",
+      "category": "testing-quality-gates",
+      "title": "Playwright tests run in CI on every PR — block merge on failure",
+      "enforcement": "established",
+      "detect": "Apply catalog rule TEST-004 (\"Playwright tests run in CI on every PR — block merge on failure\") to the changed hunks; cite file and line for every finding."
+    },
+    {
+      "id": "TEST-005",
+      "category": "testing-quality-gates",
+      "title": "Type checking, linting, and formatting in CI — block on failure",
+      "enforcement": "established",
+      "detect": "Apply catalog rule TEST-005 (\"Type checking, linting, and formatting in CI — block on failure\") to the changed hunks; cite file and line for every finding."
+    },
+    {
+      "id": "TEST-006",
+      "category": "testing-quality-gates",
+      "title": "Test pyramid enforced",
+      "enforcement": "missing",
+      "detect": "Apply catalog rule TEST-006 (\"Test pyramid enforced\") to the changed hunks; cite file and line for every finding."
+    },
+    {
+      "id": "TEST-007",
+      "category": "testing-quality-gates",
+      "title": "Visual regression testing (Playwright screenshots)",
+      "enforcement": "missing",
+      "detect": "Apply catalog rule TEST-007 (\"Visual regression testing (Playwright screenshots)\") to the changed hunks; cite file and line for every finding."
+    },
+    {
+      "id": "TEST-008",
+      "category": "testing-quality-gates",
+      "title": "API contract tests for edge function request/response schemas",
+      "enforcement": "missing",
+      "detect": "Apply catalog rule TEST-008 (\"API contract tests for edge function request/response schemas\") to the changed hunks; cite file and line for every finding."
+    },
+    {
+      "id": "TEST-009",
+      "category": "testing-quality-gates",
+      "title": "Flaky test quarantine: auto-detect, flag, fix within 48h",
+      "enforcement": "missing",
+      "detect": "Apply catalog rule TEST-009 (\"Flaky test quarantine: auto-detect, flag, fix within 48h\") to the changed hunks; cite file and line for every finding."
+    },
+    {
+      "id": "TEST-010",
+      "category": "testing-quality-gates",
+      "title": "Test data factories (faker.js) — never production data in tests",
+      "enforcement": "missing",
+      "detect": "Apply catalog rule TEST-010 (\"Test data factories (faker.js) — never production data in tests\") to the changed hunks; cite file and line for every finding."
+    },
+    {
+      "id": "TEST-011",
+      "category": "testing-quality-gates",
+      "title": "Error boundaries at route level with user-friendly fallbacks",
+      "enforcement": "missing",
+      "detect": "Apply catalog rule TEST-011 (\"Error boundaries at route level with user-friendly fallbacks\") to the changed hunks; cite file and line for every finding."
+    },
+    {
+      "id": "TEST-012",
+      "category": "testing-quality-gates",
+      "title": "lint-staged Auto-Formatting",
+      "enforcement": "established",
+      "detect": "Apply catalog rule TEST-012 (\"lint-staged Auto-Formatting\") to the changed hunks; cite file and line for every finding."
+    },
+    {
+      "id": "TEST-013",
+      "category": "testing-quality-gates",
+      "title": "Pre-Commit Custom Checks",
+      "enforcement": "established",
+      "detect": "Apply catalog rule TEST-013 (\"Pre-Commit Custom Checks\") to the changed hunks; cite file and line for every finding."
+    },
+    {
+      "id": "TEST-014",
+      "category": "testing-quality-gates",
+      "title": "Generated Artifact Blocking",
+      "enforcement": "established",
+      "detect": "Apply catalog rule TEST-014 (\"Generated Artifact Blocking\") to the changed hunks; cite file and line for every finding."
+    },
+    {
+      "id": "TEST-015",
+      "category": "testing-quality-gates",
+      "title": "Pre-Push Gate",
+      "enforcement": "established",
+      "detect": "Apply catalog rule TEST-015 (\"Pre-Push Gate\") to the changed hunks; cite file and line for every finding."
+    },
+    {
+      "id": "TEST-016",
+      "category": "testing-quality-gates",
+      "title": "Migration Safety in CI (destructive SQL scan)",
+      "enforcement": "established",
+      "detect": "Apply catalog rule TEST-016 (\"Migration Safety in CI (destructive SQL scan)\") to the changed hunks; cite file and line for every finding."
+    },
+    {
+      "id": "TEST-017",
+      "category": "testing-quality-gates",
+      "title": "Security Testing (XSS, SQLi, IDOR, SSRF via Semgrep)",
+      "enforcement": "established",
+      "detect": "Apply catalog rule TEST-017 (\"Security Testing (XSS, SQLi, IDOR, SSRF via Semgrep)\") to the changed hunks; cite file and line for every finding."
+    },
+    {
+      "id": "TEST-018",
+      "category": "testing-quality-gates",
+      "title": "Audit Reporting Standards (file/line refs)",
+      "enforcement": "established",
+      "detect": "Apply catalog rule TEST-018 (\"Audit Reporting Standards (file/line refs)\") to the changed hunks; cite file and line for every finding."
+    },
+    {
+      "id": "TEST-019",
+      "category": "testing-quality-gates",
+      "title": "Domain Priority for Unit Testing",
+      "enforcement": "established",
+      "detect": "Apply catalog rule TEST-019 (\"Domain Priority for Unit Testing\") to the changed hunks; cite file and line for every finding."
+    },
+    {
+      "id": "TEST-020",
+      "category": "testing-quality-gates",
+      "title": "Thin vs Real Logic Classification",
+      "enforcement": "established",
+      "detect": "Apply catalog rule TEST-020 (\"Thin vs Real Logic Classification\") to the changed hunks; cite file and line for every finding."
+    },
+    {
+      "id": "TEST-021",
+      "category": "testing-quality-gates",
+      "title": "DRY Test Patterns",
+      "enforcement": "established",
+      "detect": "Apply catalog rule TEST-021 (\"DRY Test Patterns\") to the changed hunks; cite file and line for every finding."
+    },
+    {
+      "id": "TEST-022",
+      "category": "testing-quality-gates",
+      "title": "E2E Tier Priority (Extended)",
+      "enforcement": "established",
+      "detect": "Apply catalog rule TEST-022 (\"E2E Tier Priority (Extended)\") to the changed hunks; cite file and line for every finding."
+    },
+    {
+      "id": "TEST-023",
+      "category": "testing-quality-gates",
+      "title": "SPA-Specific Playwright Patterns",
+      "enforcement": "established",
+      "detect": "Apply catalog rule TEST-023 (\"SPA-Specific Playwright Patterns\") to the changed hunks; cite file and line for every finding."
+    },
+    {
+      "id": "TEST-024",
+      "category": "testing-quality-gates",
+      "title": "E2E Test Data Strategy",
+      "enforcement": "established",
+      "detect": "Apply catalog rule TEST-024 (\"E2E Test Data Strategy\") to the changed hunks; cite file and line for every finding."
+    },
+    {
+      "id": "TEST-025",
+      "category": "testing-quality-gates",
+      "title": "E2E Anti-Patterns",
+      "enforcement": "established",
+      "detect": "Apply catalog rule TEST-025 (\"E2E Anti-Patterns\") to the changed hunks; cite file and line for every finding."
+    },
+    {
+      "id": "TEST-026",
+      "category": "testing-quality-gates",
+      "title": "Semgrep SAST (Extended)",
+      "enforcement": "established",
+      "detect": "Apply catalog rule TEST-026 (\"Semgrep SAST (Extended)\") to the changed hunks; cite file and line for every finding."
+    },
+    {
+      "id": "TEST-027",
+      "category": "testing-quality-gates",
+      "title": "PR Review Scoring (11 dimensions)",
+      "enforcement": "established",
+      "detect": "Apply catalog rule TEST-027 (\"PR Review Scoring (11 dimensions)\") to the changed hunks; cite file and line for every finding."
+    },
+    {
+      "id": "TEST-028",
+      "category": "testing-quality-gates",
+      "title": "PR Review Audit Mapping",
+      "enforcement": "established",
+      "detect": "Apply catalog rule TEST-028 (\"PR Review Audit Mapping\") to the changed hunks; cite file and line for every finding."
+    },
+    {
+      "id": "TEST-029",
+      "category": "testing-quality-gates",
+      "title": "Review Modes",
+      "enforcement": "established",
+      "detect": "Apply catalog rule TEST-029 (\"Review Modes\") to the changed hunks; cite file and line for every finding."
+    },
+    {
+      "id": "TEST-030",
+      "category": "testing-quality-gates",
+      "title": "Scoring Rubric",
+      "enforcement": "established",
+      "detect": "Apply catalog rule TEST-030 (\"Scoring Rubric\") to the changed hunks; cite file and line for every finding."
+    },
+    {
+      "id": "TEST-031",
+      "category": "testing-quality-gates",
+      "title": "Manual Testing Modes",
+      "enforcement": "established",
+      "detect": "Apply catalog rule TEST-031 (\"Manual Testing Modes\") to the changed hunks; cite file and line for every finding."
+    },
+    {
+      "id": "TEST-032",
+      "category": "testing-quality-gates",
+      "title": "Full Security Pipeline",
+      "enforcement": "established",
+      "detect": "Apply catalog rule TEST-032 (\"Full Security Pipeline\") to the changed hunks; cite file and line for every finding."
+    },
+    {
+      "id": "DOC-001",
+      "category": "documentation-standards",
+      "title": "Product README: purpose, architecture, setup, deployment",
+      "enforcement": "established",
+      "detect": "Apply catalog rule DOC-001 (\"Product README: purpose, architecture, setup, deployment\") to the changed hunks; cite file and line for every finding."
+    },
+    {
+      "id": "DOC-002",
+      "category": "documentation-standards",
+      "title": "API documentation auto-generated from OpenAPI/Zod schemas",
+      "enforcement": "missing",
+      "detect": "Apply catalog rule DOC-002 (\"API documentation auto-generated from OpenAPI/Zod schemas\") to the changed hunks; cite file and line for every finding."
+    },
+    {
+      "id": "DOC-003",
+      "category": "documentation-standards",
+      "title": "Customer-facing docs: searchable KB with versioned articles",
+      "enforcement": "missing",
+      "detect": "Apply catalog rule DOC-003 (\"Customer-facing docs: searchable KB with versioned articles\") to the changed hunks; cite file and line for every finding."
+    },
+    {
+      "id": "DOC-004",
+      "category": "documentation-standards",
+      "title": "In-app onboarding: tooltips, guided tours",
+      "enforcement": "missing",
+      "detect": "Apply catalog rule DOC-004 (\"In-app onboarding: tooltips, guided tours\") to the changed hunks; cite file and line for every finding."
+    },
+    {
+      "id": "DOC-005",
+      "category": "documentation-standards",
+      "title": "Changelog maintained per product — user-readable",
+      "enforcement": "missing",
+      "detect": "Apply catalog rule DOC-005 (\"Changelog maintained per product — user-readable\") to the changed hunks; cite file and line for every finding."
+    },
+    {
+      "id": "DOC-006",
+      "category": "documentation-standards",
+      "title": "Architecture Decision Records (ADRs) for every significant choice",
+      "enforcement": "established",
+      "detect": "Apply catalog rule DOC-006 (\"Architecture Decision Records (ADRs) for every significant choice\") to the changed hunks; cite file and line for every finding."
+    },
+    {
+      "id": "DOC-007",
+      "category": "documentation-standards",
+      "title": "Runbooks for ops: incident response, deployment, rollback",
+      "enforcement": "missing",
+      "detect": "Apply catalog rule DOC-007 (\"Runbooks for ops: incident response, deployment, rollback\") to the changed hunks; cite file and line for every finding."
+    },
+    {
+      "id": "DOC-008",
+      "category": "documentation-standards",
+      "title": "Component Storybook or equivalent",
+      "enforcement": "partial",
+      "detect": "Apply catalog rule DOC-008 (\"Component Storybook or equivalent\") to the changed hunks; cite file and line for every finding."
+    },
+    {
+      "id": "DOC-009",
+      "category": "documentation-standards",
+      "title": "Internal wiki: cross-product patterns, FAQ",
+      "enforcement": "missing",
+      "detect": "Apply catalog rule DOC-009 (\"Internal wiki: cross-product patterns, FAQ\") to the changed hunks; cite file and line for every finding."
+    },
+    {
+      "id": "DOC-010",
+      "category": "documentation-standards",
+      "title": "Doc reviews on PRs: behavior changes require doc updates",
+      "enforcement": "established",
+      "detect": "Apply catalog rule DOC-010 (\"Doc reviews on PRs: behavior changes require doc updates\") to the changed hunks; cite file and line for every finding."
+    },
+    {
+      "id": "DOC-011",
+      "category": "documentation-standards",
+      "title": "Backend Documentation Structure",
+      "enforcement": "established",
+      "detect": "Apply catalog rule DOC-011 (\"Backend Documentation Structure\") to the changed hunks; cite file and line for every finding."
+    },
+    {
+      "id": "DOC-012",
+      "category": "documentation-standards",
+      "title": "SQL Documentation",
+      "enforcement": "established",
+      "detect": "Apply catalog rule DOC-012 (\"SQL Documentation\") to the changed hunks; cite file and line for every finding."
+    },
+    {
+      "id": "DOC-013",
+      "category": "documentation-standards",
+      "title": "JSDoc Standards",
+      "enforcement": "established",
+      "detect": "Apply catalog rule DOC-013 (\"JSDoc Standards\") to the changed hunks; cite file and line for every finding."
+    },
+    {
+      "id": "DOC-014",
+      "category": "documentation-standards",
+      "title": "Ephemeral Artifacts (scratch/)",
+      "enforcement": "established",
+      "detect": "Apply catalog rule DOC-014 (\"Ephemeral Artifacts (scratch/)\") to the changed hunks; cite file and line for every finding."
+    },
+    {
+      "id": "DOC-015",
+      "category": "documentation-standards",
+      "title": "Acceptance Criteria Format",
+      "enforcement": "established",
+      "detect": "Apply catalog rule DOC-015 (\"Acceptance Criteria Format\") to the changed hunks; cite file and line for every finding."
+    },
+    {
+      "id": "DOC-016",
+      "category": "documentation-standards",
+      "title": "Canonical Documentation Principle",
+      "enforcement": "established",
+      "detect": "Apply catalog rule DOC-016 (\"Canonical Documentation Principle\") to the changed hunks; cite file and line for every finding."
+    },
+    {
+      "id": "DOC-017",
+      "category": "documentation-standards",
+      "title": "Backend Doc Validation Dimensions",
+      "enforcement": "established",
+      "detect": "Apply catalog rule DOC-017 (\"Backend Doc Validation Dimensions\") to the changed hunks; cite file and line for every finding."
+    },
+    {
+      "id": "DOC-018",
+      "category": "documentation-standards",
+      "title": "Backend Doc Completeness Checklist",
+      "enforcement": "established",
+      "detect": "Apply catalog rule DOC-018 (\"Backend Doc Completeness Checklist\") to the changed hunks; cite file and line for every finding."
+    },
+    {
+      "id": "DOC-019",
+      "category": "documentation-standards",
+      "title": "ER Diagram Conventions",
+      "enforcement": "established",
+      "detect": "Apply catalog rule DOC-019 (\"ER Diagram Conventions\") to the changed hunks; cite file and line for every finding."
+    },
+    {
+      "id": "DOC-020",
+      "category": "documentation-standards",
+      "title": "Backend Doc Update Mode",
+      "enforcement": "established",
+      "detect": "Apply catalog rule DOC-020 (\"Backend Doc Update Mode\") to the changed hunks; cite file and line for every finding."
+    },
+    {
+      "id": "DOC-021",
+      "category": "documentation-standards",
+      "title": "Inline JSDoc Rules",
+      "enforcement": "established",
+      "detect": "Apply catalog rule DOC-021 (\"Inline JSDoc Rules\") to the changed hunks; cite file and line for every finding."
+    },
+    {
+      "id": "DOC-022",
+      "category": "documentation-standards",
+      "title": "When to Write Docs",
+      "enforcement": "established",
+      "detect": "Apply catalog rule DOC-022 (\"When to Write Docs\") to the changed hunks; cite file and line for every finding."
+    },
+    {
+      "id": "DOC-023",
+      "category": "documentation-standards",
+      "title": "Doc Locations Map",
+      "enforcement": "established",
+      "detect": "Apply catalog rule DOC-023 (\"Doc Locations Map\") to the changed hunks; cite file and line for every finding."
+    },
+    {
+      "id": "DOC-024",
+      "category": "documentation-standards",
+      "title": "3-Phase Docs Process",
+      "enforcement": "established",
+      "detect": "Apply catalog rule DOC-024 (\"3-Phase Docs Process\") to the changed hunks; cite file and line for every finding."
+    },
+    {
+      "id": "DOC-025",
+      "category": "documentation-standards",
+      "title": "Freshness Checks",
+      "enforcement": "established",
+      "detect": "Apply catalog rule DOC-025 (\"Freshness Checks\") to the changed hunks; cite file and line for every finding."
+    },
+    {
+      "id": "GIT-001",
+      "category": "git-collaboration",
+      "title": "Conventional commits: feat/fix/chore with scope",
+      "enforcement": "established",
+      "detect": "Apply catalog rule GIT-001 (\"Conventional commits: feat/fix/chore with scope\") to the changed hunks; cite file and line for every finding."
+    },
+    {
+      "id": "GIT-002",
+      "category": "git-collaboration",
+      "title": "Feature branches with descriptive names — no direct main pushes",
+      "enforcement": "established",
+      "detect": "Apply catalog rule GIT-002 (\"Feature branches with descriptive names — no direct main pushes\") to the changed hunks; cite file and line for every finding."
+    },
+    {
+      "id": "GIT-003",
+      "category": "git-collaboration",
+      "title": "PR template: what, why, how to test, screenshots",
+      "enforcement": "missing",
+      "detect": "Apply catalog rule GIT-003 (\"PR template: what, why, how to test, screenshots\") to the changed hunks; cite file and line for every finding."
+    },
+    {
+      "id": "GIT-004",
+      "category": "git-collaboration",
+      "title": "AI-generated code must pass the same review bar as human code",
+      "enforcement": "established",
+      "detect": "Apply catalog rule GIT-004 (\"AI-generated code must pass the same review bar as human code\") to the changed hunks; cite file and line for every finding."
+    },
+    {
+      "id": "GIT-005",
+      "category": "git-collaboration",
+      "title": "Document decisions in ADRs",
+      "enforcement": "established",
+      "detect": "Apply catalog rule GIT-005 (\"Document decisions in ADRs\") to the changed hunks; cite file and line for every finding."
+    },
+    {
+      "id": "GIT-006",
+      "category": "git-collaboration",
+      "title": "Branch Types",
+      "enforcement": "established",
+      "detect": "Apply catalog rule GIT-006 (\"Branch Types\") to the changed hunks; cite file and line for every finding."
+    },
+    {
+      "id": "GIT-007",
+      "category": "git-collaboration",
+      "title": "Plan File Convention",
+      "enforcement": "established",
+      "detect": "Apply catalog rule GIT-007 (\"Plan File Convention\") to the changed hunks; cite file and line for every finding."
+    },
+    {
+      "id": "GIT-008",
+      "category": "git-collaboration",
+      "title": "Refactor + Feature Separation",
+      "enforcement": "established",
+      "detect": "Apply catalog rule GIT-008 (\"Refactor + Feature Separation\") to the changed hunks; cite file and line for every finding."
+    },
+    {
+      "id": "GIT-009",
+      "category": "git-collaboration",
+      "title": "Never Commit Unless Asked",
+      "enforcement": "established",
+      "detect": "Apply catalog rule GIT-009 (\"Never Commit Unless Asked\") to the changed hunks; cite file and line for every finding."
+    },
+    {
+      "id": "GIT-010",
+      "category": "git-collaboration",
+      "title": "Sequential Playbook Execution",
+      "enforcement": "established",
+      "detect": "Apply catalog rule GIT-010 (\"Sequential Playbook Execution\") to the changed hunks; cite file and line for every finding."
+    },
+    {
+      "id": "GIT-011",
+      "category": "git-collaboration",
+      "title": "Batching Strategy for Large Refactors",
+      "enforcement": "established",
+      "detect": "Apply catalog rule GIT-011 (\"Batching Strategy for Large Refactors\") to the changed hunks; cite file and line for every finding."
+    },
+    {
+      "id": "GIT-012",
+      "category": "git-collaboration",
+      "title": "Fix Selection Principles by Severity",
+      "enforcement": "established",
+      "detect": "Apply catalog rule GIT-012 (\"Fix Selection Principles by Severity\") to the changed hunks; cite file and line for every finding."
+    },
+    {
+      "id": "OPS-001",
+      "category": "devops-infrastructure",
+      "title": "Docker Compose for local dev — match production environment",
+      "enforcement": "established",
+      "detect": "Apply catalog rule OPS-001 (\"Docker Compose for local dev — match production environment\") to the changed hunks; cite file and line for every finding."
+    },
+    {
+      "id": "OPS-002",
+      "category": "devops-infrastructure",
+      "title": "Environment parity: dev, staging, production configs separated",
+      "enforcement": "established",
+      "detect": "Apply catalog rule OPS-002 (\"Environment parity: dev, staging, production configs separated\") to the changed hunks; cite file and line for every finding."
+    },
+    {
+      "id": "OPS-003",
+      "category": "devops-infrastructure",
+      "title": "Health checks and uptime monitoring on all services",
+      "enforcement": "established",
+      "detect": "Apply catalog rule OPS-003 (\"Health checks and uptime monitoring on all services\") to the changed hunks; cite file and line for every finding."
+    },
+    {
+      "id": "OPS-004",
+      "category": "devops-infrastructure",
+      "title": "Automated backups with tested restore procedures",
+      "enforcement": "missing",
+      "detect": "Apply catalog rule OPS-004 (\"Automated backups with tested restore procedures\") to the changed hunks; cite file and line for every finding."
+    },
+    {
+      "id": "OPS-005",
+      "category": "devops-infrastructure",
+      "title": "Resend email templates version-controlled alongside code",
+      "enforcement": "missing",
+      "detect": "Apply catalog rule OPS-005 (\"Resend email templates version-controlled alongside code\") to the changed hunks; cite file and line for every finding."
+    },
+    {
+      "id": "OPS-006",
+      "category": "devops-infrastructure",
+      "title": "CI Pipeline (5-stage)",
+      "enforcement": "established",
+      "detect": "Apply catalog rule OPS-006 (\"CI Pipeline (5-stage)\") to the changed hunks; cite file and line for every finding."
+    },
+    {
+      "id": "OPS-007",
+      "category": "devops-infrastructure",
+      "title": "Optional Services",
+      "enforcement": "established",
+      "detect": "Apply catalog rule OPS-007 (\"Optional Services\") to the changed hunks; cite file and line for every finding."
+    },
+    {
+      "id": "OPS-008",
+      "category": "devops-infrastructure",
+      "title": "Troubleshooting Playbook",
+      "enforcement": "established",
+      "detect": "Apply catalog rule OPS-008 (\"Troubleshooting Playbook\") to the changed hunks; cite file and line for every finding."
+    },
+    {
+      "id": "OPS-009",
+      "category": "devops-infrastructure",
+      "title": "DevOps Change Process",
+      "enforcement": "established",
+      "detect": "Apply catalog rule OPS-009 (\"DevOps Change Process\") to the changed hunks; cite file and line for every finding."
+    },
+    {
+      "id": "OPS-010",
+      "category": "devops-infrastructure",
+      "title": "Reference Loading by Change Type",
+      "enforcement": "established",
+      "detect": "Apply catalog rule OPS-010 (\"Reference Loading by Change Type\") to the changed hunks; cite file and line for every finding."
+    },
+    {
+      "id": "OPS-011",
+      "category": "devops-infrastructure",
+      "title": "Dual Migration Deliverables",
+      "enforcement": "established",
+      "detect": "Apply catalog rule OPS-011 (\"Dual Migration Deliverables\") to the changed hunks; cite file and line for every finding."
+    },
+    {
+      "id": "OPS-012",
+      "category": "devops-infrastructure",
+      "title": "Type Generation Verification",
+      "enforcement": "established",
+      "detect": "Apply catalog rule OPS-012 (\"Type Generation Verification\") to the changed hunks; cite file and line for every finding."
+    },
+    {
+      "id": "OPS-013",
+      "category": "devops-infrastructure",
+      "title": "Docker Publish Workflow",
+      "enforcement": "established",
+      "detect": "Apply catalog rule OPS-013 (\"Docker Publish Workflow\") to the changed hunks; cite file and line for every finding."
+    },
+    {
+      "id": "OPS-014",
+      "category": "devops-infrastructure",
+      "title": "Edge Function Router",
+      "enforcement": "established",
+      "detect": "Apply catalog rule OPS-014 (\"Edge Function Router\") to the changed hunks; cite file and line for every finding."
+    },
+    {
+      "id": "OPS-015",
+      "category": "devops-infrastructure",
+      "title": "Planned Security Pipeline",
+      "enforcement": "established",
+      "detect": "Apply catalog rule OPS-015 (\"Planned Security Pipeline\") to the changed hunks; cite file and line for every finding."
+    },
+    {
+      "id": "AI-001",
+      "category": "ai-agent-management",
+      "title": "AI agents follow the same checklist — no shortcuts for speed",
+      "enforcement": "established",
+      "detect": "Apply catalog rule AI-001 (\"AI agents follow the same checklist — no shortcuts for speed\") to the changed hunks; cite file and line for every finding."
+    },
+    {
+      "id": "AI-002",
+      "category": "ai-agent-management",
+      "title": "Human review required for: auth, payments, data migrations, RLS",
+      "enforcement": "established",
+      "detect": "Apply catalog rule AI-002 (\"Human review required for: auth, payments, data migrations, RLS\") to the changed hunks; cite file and line for every finding."
+    },
+    {
+      "id": "AI-003",
+      "category": "ai-agent-management",
+      "title": "Prompt templates standardized per task type",
+      "enforcement": "established",
+      "detect": "Apply catalog rule AI-003 (\"Prompt templates standardized per task type\") to the changed hunks; cite file and line for every finding."
+    },
+    {
+      "id": "AI-004",
+      "category": "ai-agent-management",
+      "title": "AI output tracked: generated vs. modified",
+      "enforcement": "established",
+      "detect": "Apply catalog rule AI-004 (\"AI output tracked: generated vs. modified\") to the changed hunks; cite file and line for every finding."
+    },
+    {
+      "id": "AI-005",
+      "category": "ai-agent-management",
+      "title": "Regular framework updates pushed to all agent configs",
+      "enforcement": "established",
+      "detect": "Apply catalog rule AI-005 (\"Regular framework updates pushed to all agent configs\") to the changed hunks; cite file and line for every finding."
+    },
+    {
+      "id": "AI-006",
+      "category": "ai-agent-management",
+      "title": "PEBRD Lifecycle",
+      "enforcement": "established",
+      "detect": "Apply catalog rule AI-006 (\"PEBRD Lifecycle\") to the changed hunks; cite file and line for every finding."
+    },
+    {
+      "id": "AI-007",
+      "category": "ai-agent-management",
+      "title": "Playbook Selection",
+      "enforcement": "established",
+      "detect": "Apply catalog rule AI-007 (\"Playbook Selection\") to the changed hunks; cite file and line for every finding."
+    },
+    {
+      "id": "AI-008",
+      "category": "ai-agent-management",
+      "title": "Subagent Rules (cap at 4 concurrent)",
+      "enforcement": "established",
+      "detect": "Apply catalog rule AI-008 (\"Subagent Rules (cap at 4 concurrent)\") to the changed hunks; cite file and line for every finding."
+    },
+    {
+      "id": "AI-009",
+      "category": "ai-agent-management",
+      "title": "Tier-Based Audits",
+      "enforcement": "established",
+      "detect": "Apply catalog rule AI-009 (\"Tier-Based Audits\") to the changed hunks; cite file and line for every finding."
+    },
+    {
+      "id": "AI-010",
+      "category": "ai-agent-management",
+      "title": "Model Matching",
+      "enforcement": "established",
+      "detect": "Apply catalog rule AI-010 (\"Model Matching\") to the changed hunks; cite file and line for every finding."
+    },
+    {
+      "id": "AI-011",
+      "category": "ai-agent-management",
+      "title": "Start Tight, Then Widen",
+      "enforcement": "established",
+      "detect": "Apply catalog rule AI-011 (\"Start Tight, Then Widen\") to the changed hunks; cite file and line for every finding."
+    },
+    {
+      "id": "AI-012",
+      "category": "ai-agent-management",
+      "title": "Keep Both Skills Sharp",
+      "enforcement": "established",
+      "detect": "Apply catalog rule AI-012 (\"Keep Both Skills Sharp\") to the changed hunks; cite file and line for every finding."
+    },
+    {
+      "id": "AI-013",
+      "category": "ai-agent-management",
+      "title": "Skill Registration",
+      "enforcement": "established",
+      "detect": "Apply catalog rule AI-013 (\"Skill Registration\") to the changed hunks; cite file and line for every finding."
+    },
+    {
+      "id": "AI-014",
+      "category": "ai-agent-management",
+      "title": "REFERENCE.md Convention",
+      "enforcement": "established",
+      "detect": "Apply catalog rule AI-014 (\"REFERENCE.md Convention\") to the changed hunks; cite file and line for every finding."
+    },
+    {
+      "id": "AI-015",
+      "category": "ai-agent-management",
+      "title": "Parallel Write Safety",
+      "enforcement": "established",
+      "detect": "Apply catalog rule AI-015 (\"Parallel Write Safety\") to the changed hunks; cite file and line for every finding."
+    },
+    {
+      "id": "AI-016",
+      "category": "ai-agent-management",
+      "title": "Audit-to-Playbook Feedback Loop",
+      "enforcement": "established",
+      "detect": "Apply catalog rule AI-016 (\"Audit-to-Playbook Feedback Loop\") to the changed hunks; cite file and line for every finding."
+    },
+    {
+      "id": "AI-017",
+      "category": "ai-agent-management",
+      "title": "Audit Sweep Fix Priority",
+      "enforcement": "established",
+      "detect": "Apply catalog rule AI-017 (\"Audit Sweep Fix Priority\") to the changed hunks; cite file and line for every finding."
+    },
+    {
+      "id": "AI-018",
+      "category": "ai-agent-management",
+      "title": "IDE-Specific Skill Loading",
+      "enforcement": "established",
+      "detect": "Apply catalog rule AI-018 (\"IDE-Specific Skill Loading\") to the changed hunks; cite file and line for every finding."
+    },
+    {
+      "id": "AI-019",
+      "category": "ai-agent-management",
+      "title": "Sharp Boundaries Pattern",
+      "enforcement": "established",
+      "detect": "Apply catalog rule AI-019 (\"Sharp Boundaries Pattern\") to the changed hunks; cite file and line for every finding."
+    },
+    {
+      "id": "AI-020",
+      "category": "ai-agent-management",
+      "title": "Agent Link Validation (Pre-Commit/Pre-Push)",
+      "enforcement": "established",
+      "detect": "Apply catalog rule AI-020 (\"Agent Link Validation (Pre-Commit/Pre-Push)\") to the changed hunks; cite file and line for every finding."
+    },
+    {
+      "id": "AI-021",
+      "category": "ai-agent-management",
+      "title": "11 Review Dimensions",
+      "enforcement": "established",
+      "detect": "Apply catalog rule AI-021 (\"11 Review Dimensions\") to the changed hunks; cite file and line for every finding."
+    }
+  ],
+  "surface_path_globs": {
+    "process": [
+      "**/*.md",
+      ".github/**",
+      "**/*.test.ts",
+      "**/*.test.tsx",
+      "**/*.spec.ts",
+      "**/tests/**",
+      "**/e2e/**",
+      "**/package.json",
+      "**/Makefile",
+      "**/Dockerfile",
+      "**/docker-compose*.yml"
+    ]
+  }
+}
