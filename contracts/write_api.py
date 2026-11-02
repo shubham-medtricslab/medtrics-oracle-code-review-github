@@ -30,8 +30,12 @@ class DiffLine(TypedDict):
     text: str
 
 
-def walk_hunk(unified_text: str, new_start: int, old_start: int) -> Iterator[DiffLine]:
+def walk_hunk(unified_text: str, new_start: int, old_start: int,
+              *, path: str = "") -> Iterator[DiffLine]:
     """Walk one hunk, yielding every line with correct new/old numbering.
+
+    `path` is keyword-only and populates `DiffLine.path`. Added in contract v1.1;
+    the positional signature is unchanged.
 
     THE SINGLE SOURCE OF TRUTH for diff line numbering. `detectors.py:29-35` and
     `github_write.py:44-51` each walked this text differently, so the detector
@@ -64,10 +68,11 @@ def commentable_lines(prfetch: dict, path: str) -> set[int]:
 # 2. The output validator - the trust boundary
 # --------------------------------------------------------------------------- #
 class ValidationResult(TypedDict):
-    findings: list[dict]     # conforming to run-record.schema.json #/findings
-    rejected: list[dict]     # {finding, reason} - audited, never posted
-    verdict: Verdict         # RECOMPUTED, never taken from the model
+    findings: list[dict]       # conforming to run-record.schema.json #/findings
+    rejected: list[dict]       # {finding, reason} - audited, never posted
+    verdict: Verdict           # RECOMPUTED, never taken from the model
     check_conclusion: str
+    summary_markdown: str      # SANITIZED model prose, contract v1.1
 
 
 def validate_agent_output(
@@ -77,6 +82,8 @@ def validate_agent_output(
     allowed_paths: frozenset[str],
     blocking_enabled: bool,
     max_body_chars: int = 65_535,
+    default_rulepack_id: str = "unknown",
+    checkout_root: Optional[str] = None,
 ) -> ValidationResult:
     """Turn untrusted agent output into a safe, posted-ready finding set.
 
@@ -95,6 +102,14 @@ def validate_agent_output(
           * strip raw HTML
           * defang '@' followed by a word character
           * enforce per-field and total length caps
+        This includes `summary_markdown`. The model's prose is as untrusted as
+        the diff it was derived from, and it lands in the review body verbatim.
+      - `default_rulepack_id` fills `rulepack_id` when a finding omits it, since
+        run-record requires that field. A finding naming an unknown rulepack is
+        rejected, not silently relabelled.
+      - `checkout_root`, when given, is the directory paths are resolved against
+        for the symlink check. Without it, symlink detection is skipped and only
+        the lexical checks apply - so pass it whenever a checkout exists.
     """
     raise NotImplementedError
 
