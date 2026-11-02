@@ -1,0 +1,238 @@
+name: AI Review (reusable)
+
+# ---------------------------------------------------------------------------
+# The reusable half of the packaging. A consuming repo writes ~10 lines (see
+# action/examples/consumer-workflow.yml) and gets the whole lifecycle.
+#
+# The triggers live in the CALLER, because `workflow_call` workflows cannot
+# declare their own `pull_request` events. The caller must enumerate actions
+# explicitly -- `opened`, `reopened`, `ready_for_review`, `synchronize`,
+# `closed` -- rather than relying on the default set. The example does this and
+# explains why each one is there.
+# ---------------------------------------------------------------------------
+on:
+  workflow_call:
+    inputs:
+      rulepacks:
+        description: 'Rulepack IDs, comma- or newline-separated. Empty means the core default set.'
+        type: string
+        required: false
+        default: ''
+      severity_floor:
+        description: 'info | low | medium | high | critical'
+        type: string
+        required: false
+        default: 'medium'
+      model_tier:
+        description: 'economy | standard | premium'
+        type: string
+        required: false
+        default: 'standard'
+      max_changed_files:
+        type: number
+        required: false
+        default: 400
+      reviewer_timeout_seconds:
+        type: number
+        required: false
+        default: 600
+      max_budget_usd:
+        description: 'Per-run spend ceiling. Empty leaves it to core policy.'
+        type: string
+        required: false
+        default: ''
+      dry_run:
+        description: 'Compute but post nothing. DEFAULT TRUE.'
+        type: boolean
+        required: false
+        default: true
+      blocking:
+        description: 'Let the check conclude failure/action_required. DEFAULT FALSE.'
+        type: boolean
+        required: false
+        default: false
+      enabled:
+        type: boolean
+        required: false
+        default: true
+      kill_switch:
+        description: 'Org emergency stop. Skips the reviewer, still completes the check.'
+        type: boolean
+        required: false
+        default: false
+      skip_forks:
+        type: boolean
+        required: false
+        default: true
+      skip_drafts:
+        type: boolean
+        required: false
+        default: true
+      check_name:
+        description: 'The string you mark as a required check.'
+        type: string
+        required: false
+        default: 'AI Review'
+      config_path:
+        type: string
+        required: false
+        default: '.github/ai-review.yml'
+      job_timeout_minutes:
+        description: 'Job-level ceiling. Must exceed job_timeout_seconds with room to finalize.'
+        type: number
+        required: false
+        default: 45
+      job_timeout_seconds:
+        description: 'Ceiling on the review phase itself, enforced inside the action.'
+        type: number
+        required: false
+        default: 1800
+      claude_code_version:
+        type: string
+        required: false
+        default: '2.1.175'
+      reviewer_ref:
+        description: >-
+          Ref of this repository to check the action out from. Pin to a tag in
+          production; a floating ref means the reviewer can change under you.
+        type: string
+        required: false
+        default: 'main'
+      app_id:
+        description: 'GitHub App ID. Not a secret; store it as a repo or org variable.'
+        type: string
+        required: true
+    secrets:
+      app_private_key:
+        description: 'GitHub App private key. Never reaches the step that runs the agent.'
+        required: true
+      anthropic_api_key:
+        description: 'Required: `claude --bare` does not read subscription login.'
+        required: true
+    outputs:
+      verdict:
+        description: 'comment | request_changes | needs_discussion'
+        value: ${{ jobs.review.outputs.verdict }}
+      check_conclusion:
+        description: 'The conclusion actually posted to the check run.'
+        value: ${{ jobs.review.outputs.check_conclusion }}
+      outcome:
+        description: 'ok | policy_refusal | agent_failed | timed_out | cancelled | skipped_* | infra_error'
+        value: ${{ jobs.review.outputs.outcome }}
+
+permissions: {}
+
+jobs:
+  # -------------------------------------------------------------------------
+  # The review itself.
+  #
+  # Job-level concurrency is a backstop. The caller should also set
+  # workflow-level concurrency (the example does), but a consumer who forgets
+  # should still get debouncing: ten pushes to a branch must cost one review,
+  # not ten. It also resolves in-flight supersede -- a push landing mid-review
+  # cancels the stale run rather than letting it post against a moved SHA --
+  # and the action's `always()` finalizer closes the cancelled run's check as
+  # `neutral`, never `cancelled`, which would block.
+  # -------------------------------------------------------------------------
+  review:
+    name: AI review
+    if: ${{ github.event.action != 'closed' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: ${{ inputs.job_timeout_minutes }}
+    concurrency:
+      group: ai-review-${{ github.repository }}-${{ github.event.pull_request.number || github.ref }}
+      cancel-in-progress: true
+    permissions:
+      # Deliberately minimal. The real write capability comes from the App
+      # installation token the action mints, not from this token. The only
+      # thing this token does is post the "skipped" check run on a path where
+      # no App token exists.
+      contents: read
+      checks: write
+      pull-requests: read
+    outputs:
+      verdict: ${{ steps.review.outputs.verdict }}
+      check_conclusion: ${{ steps.review.outputs.check_conclusion }}
+      outcome: ${{ steps.review.outputs.outcome }}
+    steps:
+      - name: Check out the reviewer
+        uses: actions/checkout@v4
+        with:
+          repository: medtrics/ai-code-review
+          ref: ${{ inputs.reviewer_ref }}
+          path: .ai-code-review
+          persist-credentials: false
+
+      - name: Review
+        id: review
+        uses: ./.ai-code-review/action
+        with:
+          rulepacks: ${{ inputs.rulepacks }}
+          severity_floor: ${{ inputs.severity_floor }}
+          model_tier: ${{ inputs.model_tier }}
+          max_changed_files: ${{ inputs.max_changed_files }}
+          reviewer_timeout_seconds: ${{ inputs.reviewer_timeout_seconds }}
+          max_budget_usd: ${{ inputs.max_budget_usd }}
+          dry_run: ${{ inputs.dry_run }}
+          blocking: ${{ inputs.blocking }}
+          enabled: ${{ inputs.enabled }}
+          kill_switch: ${{ inputs.kill_switch }}
+          skip_forks: ${{ inputs.skip_forks }}
+          skip_drafts: ${{ inputs.skip_drafts }}
+          check_name: ${{ inputs.check_name }}
+          config_path: ${{ inputs.config_path }}
+          job_timeout_seconds: ${{ inputs.job_timeout_seconds }}
+          claude_code_version: ${{ inputs.claude_code_version }}
+          app_id: ${{ inputs.app_id }}
+          app_private_key: ${{ secrets.app_private_key }}
+          anthropic_api_key: ${{ secrets.anthropic_api_key }}
+
+      - name: Record the outcome in the job summary
+        if: ${{ always() }}
+        env:
+          OUTCOME: ${{ steps.review.outputs.outcome }}
+          CONCLUSION: ${{ steps.review.outputs.check_conclusion }}
+          VERDICT: ${{ steps.review.outputs.verdict }}
+          CHECK_NAME: ${{ inputs.check_name }}
+        run: |
+          set -uo pipefail
+          {
+            echo "### ${CHECK_NAME}"
+            echo ""
+            echo "- outcome: \`${OUTCOME:-unknown}\`"
+            echo "- check conclusion: \`${CONCLUSION:-unknown}\`"
+            echo "- verdict: \`${VERDICT:-n/a}\`"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+  # -------------------------------------------------------------------------
+  # Close out a pull request that was closed or merged mid-review.
+  #
+  # Without this, a review cancelled by the close event can leave a check run
+  # `in_progress` forever. On a merged pull request that is only cosmetic, but
+  # on a reopened one it is a stuck required check.
+  # -------------------------------------------------------------------------
+  reap:
+    name: Close dangling checks
+    if: ${{ github.event.action == 'closed' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read
+      checks: write
+    steps:
+      - name: Check out the reviewer
+        uses: actions/checkout@v4
+        with:
+          repository: medtrics/ai-code-review
+          ref: ${{ inputs.reviewer_ref }}
+          path: .ai-code-review
+          persist-credentials: false
+
+      - name: Reap
+        uses: ./.ai-code-review/action
+        with:
+          mode: reap
+          check_name: ${{ inputs.check_name }}
+          app_id: ${{ inputs.app_id }}
+          app_private_key: ${{ secrets.app_private_key }}
+          anthropic_api_key: ${{ secrets.anthropic_api_key }}

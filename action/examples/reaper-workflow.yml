@@ -1,0 +1,103 @@
+# Optional. Copy to `.github/workflows/ai-review-reaper.yml`.
+#
+# Install this if -- and only if -- you have marked the AI Review check as
+# REQUIRED in branch protection. At that point a check run stuck `in_progress`
+# stops being cosmetic and starts blocking every affected pull request.
+#
+# The action already guarantees completion on every exit path it controls: an
+# `always()` finalizer that runs even under cancellation, a four-tier fallback
+# in `check_run.py complete`, and a `closed`-triggered reap. What none of that
+# survives is the runner disappearing mid-job -- a spot reclaim, an
+# infrastructure fault, a hard kill. Nothing running on that runner gets to
+# post anything. This sweeper is the answer to that one residual case.
+#
+# It is deliberately not part of the reusable workflow: a scheduled job that
+# writes check runs across every open pull request is a decision a repo should
+# make on purpose, not inherit.
+
+name: AI Review reaper
+
+on:
+  schedule:
+    # Every 30 minutes. A stuck check is an outage, so the sweep interval is
+    # the worst-case time a pull request stays unmergeable.
+    - cron: '*/30 * * * *'
+  workflow_dispatch:
+    inputs:
+      head_sha:
+        description: 'Reap a single SHA instead of sweeping open pull requests.'
+        type: string
+        required: false
+        default: ''
+
+permissions: {}
+
+jobs:
+  reap:
+    name: Close stuck AI Review checks
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+      pull-requests: read
+      checks: write
+    steps:
+      - name: Check out the reviewer
+        uses: actions/checkout@v4
+        with:
+          repository: medtrics/ai-code-review
+          ref: v1
+          path: .ai-code-review
+          persist-credentials: false
+
+      - name: Mint a token
+        id: token
+        uses: actions/create-github-app-token@v2
+        with:
+          app-id: ${{ vars.AI_REVIEW_APP_ID }}
+          private-key: ${{ secrets.AI_REVIEW_APP_PRIVATE_KEY }}
+          permission-checks: write
+          permission-pull-requests: read
+
+      - name: Sweep
+        env:
+          GITHUB_TOKEN: ${{ steps.token.outputs.token }}
+          REPO: ${{ github.repository }}
+          ONE_SHA: ${{ inputs.head_sha }}
+          CHECK_NAME: 'AI Review'
+        run: |
+          set -uo pipefail
+
+          reap_one() {
+            python3 .ai-code-review/action/scripts/check_run.py reap \
+              --repo "${REPO}" \
+              --sha "$1" \
+              --name "${CHECK_NAME}" \
+              --conclusion neutral \
+              --title "Review did not complete" \
+              --summary "This review run ended without completing its check, most likely because the runner was terminated. The check was closed as \`neutral\` so it cannot block merging. Push a commit or re-run the workflow to get a fresh review."
+            # Exit 1 from `reap` means "nothing stuck", which is the normal case.
+            return 0
+          }
+
+          if [ -n "${ONE_SHA}" ]; then
+            reap_one "${ONE_SHA}"
+            exit 0
+          fi
+
+          # Sweep the head SHA of every open pull request.
+          page=1
+          while :; do
+            body="$(curl -sS \
+              -H "Authorization: Bearer ${GITHUB_TOKEN}" \
+              -H "Accept: application/vnd.github+json" \
+              -H "X-GitHub-Api-Version: 2022-11-28" \
+              "${GITHUB_API_URL}/repos/${REPO}/pulls?state=open&per_page=100&page=${page}")" || break
+            shas="$(printf '%s' "${body}" | python3 -c 'import json,sys; print("\n".join(p["head"]["sha"] for p in json.load(sys.stdin)))')" || break
+            [ -z "${shas}" ] && break
+            while IFS= read -r sha; do
+              [ -n "${sha}" ] && reap_one "${sha}"
+            done <<< "${shas}"
+            page=$((page + 1))
+            [ "${page}" -gt 10 ] && break
+          done

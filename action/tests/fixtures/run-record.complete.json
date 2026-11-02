@@ -1,0 +1,88 @@
+{
+  "schema_version": "1.0",
+  "run_id": "fixture-complete",
+  "repo": "medtrics/example",
+  "pr_number": 42,
+  "head_sha": "1111111111111111111111111111111111111111",
+  "base_sha": "2222222222222222222222222222222222222222",
+  "is_fork": false,
+  "status": "complete",
+  "verdict": "request_changes",
+  "review_event": "COMMENT",
+  "check_conclusion": "failure",
+  "completeness": {
+    "diff_truncated": false,
+    "truncation_reason": null,
+    "files_seen": 12,
+    "files_total": 12,
+    "partial_dimensions": [],
+    "local_checkout": true
+  },
+  "findings": [
+    {
+      "dedup_key": "aaa",
+      "principle_id": "SEC-014",
+      "rulepack_id": "supabase-rls",
+      "rulepack_version": "1.0.0",
+      "severity": "critical",
+      "surface": "rls",
+      "enforcement": "established",
+      "advisory": false,
+      "path": "src/auth/session.ts",
+      "line": 88,
+      "positionable": true,
+      "message": "Session token is compared with a non-constant-time equality check.",
+      "evidence": "if (token === expected) {",
+      "headline": "Timing-unsafe token comparison",
+      "dedup_verdict": "new"
+    },
+    {
+      "dedup_key": "bbb",
+      "principle_id": "DL-009",
+      "rulepack_id": "supabase-rls",
+      "rulepack_version": "1.0.0",
+      "severity": "medium",
+      "surface": "data_layer",
+      "enforcement": "established",
+      "advisory": false,
+      "path": "src/services/patients.service.ts",
+      "line": 12,
+      "positionable": true,
+      "message": "select('*') - enumerate columns; never select * on wide/JSONB tables (DL-009).",
+      "evidence": null,
+      "headline": "Unbounded column selection",
+      "dedup_verdict": "new"
+    },
+    {
+      "dedup_key": "ccc",
+      "principle_id": "A11Y-002",
+      "rulepack_id": "base",
+      "rulepack_version": "1.0.0",
+      "severity": "low",
+      "surface": "ux_a11y",
+      "enforcement": "missing",
+      "advisory": true,
+      "path": null,
+      "line": null,
+      "positionable": false,
+      "message": "No automated check exists for this principle; flagged for human review.",
+      "evidence": null,
+      "headline": "Advisory, no detector",
+      "dedup_verdict": "new"
+    }
+  ],
+  "summary_markdown": "Two substantive issues, both in code paths touched by this change.",
+  "risk": { "score": 71.5, "band": "high" },
+  "cost": {
+    "total_usd": 0.4213,
+    "per_surface_usd": { "rls": 0.31, "data_layer": 0.11 },
+    "model": "claude-sonnet-4-6",
+    "budget_exceeded": false
+  },
+  "timings": {
+    "total_seconds": 184.2,
+    "per_stage_seconds": { "fetch": 3.1, "segment": 0.4, "review": 171.0 }
+  },
+  "connectors": { "linear": "unconfigured", "slack": "unconfigured" },
+  "errors": []
+}
