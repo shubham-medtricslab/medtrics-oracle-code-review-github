@@ -1,0 +1,28 @@
+{
+  "schema_version": "1.0",
+  "run_id": "fixture-incomplete",
+  "repo": "medtrics/example",
+  "pr_number": 43,
+  "head_sha": "3333333333333333333333333333333333333333",
+  "base_sha": "4444444444444444444444444444444444444444",
+  "is_fork": false,
+  "status": "incomplete",
+  "verdict": "needs_discussion",
+  "review_event": "COMMENT",
+  "check_conclusion": "success",
+  "completeness": {
+    "diff_truncated": true,
+    "truncation_reason": "pagination cap reached",
+    "files_seen": 300,
+    "files_total": 1240,
+    "partial_dimensions": ["security_privacy"],
+    "local_checkout": true
+  },
+  "findings": [],
+  "summary_markdown": "No findings in the portion of the diff that was reviewed.",
+  "risk": { "score": 10.0, "band": "low" },
+  "cost": { "total_usd": 0.08, "model": "claude-haiku-4-6", "budget_exceeded": false },
+  "timings": { "total_seconds": 44.0 },
+  "connectors": {},
+  "errors": []
+}
