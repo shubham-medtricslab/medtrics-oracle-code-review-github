@@ -1,0 +1,42 @@
+name: AI Review (self)
+
+# Dogfood. This repository reviews its own pull requests through the same
+# reusable workflow an adopter would call, so the ten-line consumer snippet is
+# exercised on every change rather than only in the README.
+#
+# It no-ops cleanly until the App and secrets are configured (see the job's
+# `if:`), which keeps the repository usable before the GitHub App exists.
+
+on:
+  pull_request:
+    types:
+      - opened
+      - reopened
+      - ready_for_review
+      - synchronize
+      - closed
+
+concurrency:
+  group: ai-review-self-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+permissions: {}
+
+jobs:
+  review:
+    # Without the App configured there is nothing to mint a token with, and a
+    # job that fails for want of a secret teaches nobody anything.
+    if: ${{ vars.AI_REVIEW_APP_ID != '' }}
+    uses: ./.github/workflows/ai-review.yml
+    with:
+      app_id: ${{ vars.AI_REVIEW_APP_ID }}
+      # This repository reviews itself; keep it honest about its own defaults.
+      dry_run: true
+      blocking: false
+      check_name: 'AI Review'
+      # `uses: ./...` already pins the reviewer to this commit, so the ref
+      # input is only consulted for the nested checkout.
+      reviewer_ref: ${{ github.event.pull_request.base.ref }}
+    secrets:
+      app_private_key: ${{ secrets.AI_REVIEW_APP_PRIVATE_KEY }}
+      anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}

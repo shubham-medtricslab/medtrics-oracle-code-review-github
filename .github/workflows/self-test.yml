@@ -1,0 +1,305 @@
+name: Self-test
+
+# The repo exercises its own action. Four layers, cheapest first:
+#
+#   lint      the workflows and the shell inside them actually parse
+#   unit      the conclusion table, the YAML subset, the check-run ladder
+#   fixture   the run-record -> check-run rendering, end to end via the CLI
+#   smoke     the composite action itself runs on a real pull_request event
+#
+# `smoke` is the one that matters for packaging: a unit test cannot catch a
+# mistyped step `id`, a context that is not available to composite actions, or
+# an `if:` that never fires. It runs the action down the skip path, which needs
+# no credentials, and asserts the check run reached a completed state.
+
+on:
+  pull_request:
+    types: [opened, reopened, ready_for_review, synchronize]
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions: {}
+
+env:
+  ACTIONLINT_VERSION: '1.7.7'
+
+jobs:
+  lint:
+    name: Lint workflows
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Install actionlint
+        run: |
+          set -euo pipefail
+          url="https://github.com/rhysd/actionlint/releases/download/v${ACTIONLINT_VERSION}/actionlint_${ACTIONLINT_VERSION}_linux_amd64.tar.gz"
+          curl -fsSL "${url}" -o /tmp/actionlint.tar.gz
+          tar -xzf /tmp/actionlint.tar.gz -C /tmp actionlint
+          /tmp/actionlint --version
+
+      - name: actionlint
+        run: |
+          set -euo pipefail
+          # actionlint hands every `run:` block to the preinstalled static
+          # shell analyser, which is what catches an unquoted expansion in a
+          # step whose input came from a pull request.
+          /tmp/actionlint -color
+
+      - name: actionlint on the example workflows
+        run: |
+          set -euo pipefail
+          # The examples are what adopters copy. Lint them too, or we ship a
+          # broken ten-line snippet.
+          /tmp/actionlint -color action/examples/*.yml
+
+      - name: Every workflow and the action parse as YAML
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import glob
+          import sys
+
+          # The action and the workflows are real YAML, so this needs a real
+          # parser -- action/scripts/minyaml.py is for the review config only
+          # and deliberately refuses most of the language.
+          try:
+              import yaml
+          except ImportError:
+              print("PyYAML unavailable; actionlint already parsed these")
+              sys.exit(0)
+
+          paths = sorted(
+              glob.glob(".github/workflows/*.yml")
+              + glob.glob("action/examples/*.yml")
+              + ["action/action.yml"]
+          )
+          for path in paths:
+              with open(path, encoding="utf-8") as fh:
+                  yaml.safe_load(fh)
+              print(f"ok  {path}")
+          PY
+
+      - name: No pull_request_target trigger anywhere
+        run: |
+          set -euo pipefail
+          # `pull_request_target` runs with base-repo privileges against
+          # attacker-controlled code, which would hand a fork author the keys.
+          # There is no safe use of it here, so this is a grep rather than a
+          # review convention. Matches the trigger declaration specifically,
+          # so prose and this check itself do not trip it.
+          if grep -rnE '^[[:space:]]*pull_request_target:' \
+               --include='*.yml' --include='*.yaml' .; then
+            echo "::error::pull_request_target is forbidden in this repository."
+            exit 1
+          fi
+          echo "ok: no pull_request_target trigger"
+
+  unit:
+    name: Unit tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Action script tests
+        run: python3 -m unittest discover -s action/tests -t action/tests -v
+
+      - name: Core stays stdlib-only
+        run: python3 tools/stdlib_lint.py packages/core
+
+      - name: Action scripts stay stdlib-only too
+        run: |
+          set -euo pipefail
+          # Same property, same reason: no pip install in the job that handles
+          # untrusted pull requests. Enforced with the same linter, pointed at
+          # the action. ALLOWED_LOCAL_ROOTS does not cover these module names,
+          # so they are passed explicitly.
+          python3 - <<'PY'
+          import ast
+          import os
+          import sys
+
+          root = "action/scripts"
+          local = {
+              os.path.splitext(f)[0]
+              for f in os.listdir(root)
+              if f.endswith(".py")
+          }
+          stdlib = set(sys.stdlib_module_names)
+          bad = []
+          for name in sorted(os.listdir(root)):
+              if not name.endswith(".py"):
+                  continue
+              path = os.path.join(root, name)
+              with open(path, encoding="utf-8") as fh:
+                  tree = ast.parse(fh.read(), filename=path)
+              for node in ast.walk(tree):
+                  mods = []
+                  if isinstance(node, ast.Import):
+                      mods = [a.name.split(".")[0] for a in node.names]
+                  elif isinstance(node, ast.ImportFrom) and node.module and not node.level:
+                      mods = [node.module.split(".")[0]]
+                  for mod in mods:
+                      if mod not in stdlib and mod not in local:
+                          bad.append(f"{path}: {mod}")
+          if bad:
+              print("NON-STDLIB IMPORTS IN action/scripts:")
+              for line in bad:
+                  print(f"  {line}")
+              sys.exit(1)
+          print(f"ok: {len(local)} action scripts, stdlib only")
+          PY
+
+  fixture:
+    name: Fixture rendering
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: A clean blocking run can conclude success
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import json
+          with open("action/tests/fixtures/run-record.complete.json", encoding="utf-8") as fh:
+              record = json.load(fh)
+          record["findings"] = []
+          record["check_conclusion"] = "success"
+          record["verdict"] = "comment"
+          with open("/tmp/clean.json", "w", encoding="utf-8") as fh:
+              json.dump(record, fh)
+          PY
+          python3 action/scripts/render_summary.py \
+            --outcome ok --run-record /tmp/clean.json \
+            --blocking true --dry-run false --out /tmp/clean-out.json
+          test "$(python3 -c 'import json;print(json.load(open("/tmp/clean-out.json"))["conclusion"])')" = "success"
+
+      - name: The same run is neutral when blocking is off
+        run: |
+          set -euo pipefail
+          python3 action/scripts/render_summary.py \
+            --outcome ok --run-record /tmp/clean.json \
+            --blocking false --dry-run true --out /tmp/advisory.json
+          test "$(python3 -c 'import json;print(json.load(open("/tmp/advisory.json"))["conclusion"])')" = "neutral"
+
+      - name: A truncated run never concludes success
+        run: |
+          set -euo pipefail
+          python3 action/scripts/render_summary.py \
+            --outcome ok --run-record action/tests/fixtures/run-record.incomplete.json \
+            --blocking true --dry-run false --out /tmp/incomplete.json
+          test "$(python3 -c 'import json;print(json.load(open("/tmp/incomplete.json"))["conclusion"])')" = "neutral"
+
+      - name: No failure path can conclude success or block
+        run: |
+          set -euo pipefail
+          for outcome in policy_refusal agent_failed timed_out cancelled infra_error; do
+            python3 action/scripts/render_summary.py \
+              --outcome "${outcome}" \
+              --run-record action/tests/fixtures/run-record.complete.json \
+              --blocking true --dry-run false --out "/tmp/${outcome}.json"
+            got="$(python3 -c "import json;print(json.load(open('/tmp/${outcome}.json'))['conclusion'])")"
+            if [ "${got}" != "neutral" ]; then
+              echo "::error::${outcome} concluded ${got}; expected neutral"
+              exit 1
+            fi
+          done
+          echo "ok: every failure path fails open to neutral"
+
+      - name: Output respects GitHub's size limits
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import json, sys
+          sys.path.insert(0, "action/scripts")
+          import render_summary as rs
+
+          with open("action/tests/fixtures/run-record.complete.json", encoding="utf-8") as fh:
+              record = json.load(fh)
+          record["summary_markdown"] = "x" * 400_000
+          template = record["findings"][0]
+          record["findings"] = [dict(template, line=i + 1) for i in range(400)]
+
+          out = rs.render("ok", record, None, {"blocking": True, "dry_run": False})
+          assert len(out["summary"]) <= 65_535, len(out["summary"])
+          assert len(out["text"]) <= 65_535, len(out["text"])
+          assert "Truncated" in out["summary"]
+          print("ok: summary and text within 65,535 characters, truncation marked")
+          PY
+
+  smoke:
+    name: Action smoke test
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+      checks: write
+      pull-requests: read
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      # Runs the real composite action on a real pull_request payload, down
+      # the skip path. `enabled: false` means no token is minted, nothing is
+      # spent, and no agent runs -- but preflight, paths, outcome and the
+      # finalizer all execute for real, which is where the packaging bugs live.
+      - name: Run the action (disabled)
+        id: disabled
+        if: ${{ github.event_name == 'pull_request' }}
+        uses: ./action
+        with:
+          enabled: false
+          check_name: 'AI Review (self-test)'
+          app_id: '0'
+          app_private_key: 'unused-on-the-skip-path'
+          anthropic_api_key: 'unused-on-the-skip-path'
+
+      - name: The skip path reports an outcome and never blocks
+        if: ${{ github.event_name == 'pull_request' }}
+        env:
+          OUTCOME: ${{ steps.disabled.outputs.outcome }}
+        run: |
+          set -euo pipefail
+          if [ "${OUTCOME}" != "skipped_disabled" ]; then
+            echo "::error::expected skipped_disabled, got '${OUTCOME}'"
+            exit 1
+          fi
+          echo "ok: action reported ${OUTCOME}"
+
+      - name: The self-test check run is completed, not left pending
+        if: ${{ github.event_name == 'pull_request' }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        run: |
+          set -euo pipefail
+          # The invariant, asserted against the live API rather than a mock.
+          status="$(curl -fsSL \
+            -H "Authorization: Bearer ${GH_TOKEN}" \
+            -H "Accept: application/vnd.github+json" \
+            -H "X-GitHub-Api-Version: 2022-11-28" \
+            "${GITHUB_API_URL}/repos/${REPO}/commits/${HEAD_SHA}/check-runs?check_name=AI%20Review%20(self-test)" \
+            | python3 -c 'import json,sys; runs=json.load(sys.stdin)["check_runs"]; print(runs[0]["status"] if runs else "missing")')"
+          echo "self-test check run status: ${status}"
+          if [ "${status}" = "in_progress" ] || [ "${status}" = "queued" ]; then
+            echo "::error::the check run was left pending; this would block merges"
+            exit 1
+          fi

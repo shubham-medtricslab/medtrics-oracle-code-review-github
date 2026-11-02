@@ -61,6 +61,14 @@ for suite in packages/core/aireview/*/tests; do
     python3 -m unittest discover -s "$suite" -t packages/core -q
 done
 
+# action/tests has no __init__.py, so it is its own top-level dir rather than
+# a package under the repo root. Discovery from the root fails with
+# "Start directory is not importable" if -t is wrong.
+if [ -d action/tests ]; then
+  run "unittest action/tests" \
+    python3 -m unittest discover -s action/tests -t action/tests -q
+fi
+
 # --- CLI smoke --------------------------------------------------------------
 run "cli --help" env PYTHONPATH=packages/core python3 -m aireview --help
 
