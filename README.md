@@ -27,6 +27,10 @@ Established by spike against Claude Code **v2.1.175**, not assumed:
 
 - The sub-agent tool is named **`Agent`**, not `Task`. (v0.5.0's
   `review-orchestrator` says "Task tool"; that name is stale.)
+- There are **18 detectors**, not 17. `detectors.py:58` has 18 entries that
+  collapse to 17 distinct emitted IDs *because of* the `FA-009b` collision at
+  `detectors.py:104`. The familiar "17" was a symptom of the bug, and v0.5.0 had
+  no detector parity assertion of any kind to catch it.
 - `--tools "Read,Grep,Glob"` **genuinely restricts** the tool set — a dispatch
   attempt returns BLOCKED with no permission denial. This is the hardening
   primitive.

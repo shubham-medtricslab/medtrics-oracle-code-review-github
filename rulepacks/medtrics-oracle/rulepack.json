@@ -1,0 +1,879 @@
+{
+  "id": "medtrics-oracle",
+  "version": "1.0.0",
+  "description": "Medtrics Oracle specifics: the repo's domain system, portal model, import bans, HIPAA/FERPA rules and the 42 domain overlays.",
+  "requires": [
+    "base",
+    "react-ts",
+    "supabase-rls"
+  ],
+  "rules": [
+    {
+      "id": "FA-006",
+      "category": "frontend-architecture",
+      "title": "Data Flow Direction (Component → Hook → Service → Supabase)",
+      "enforcement": "established",
+      "detect": "Apply catalog rule FA-006 (\"Data Flow Direction (Component → Hook → Service → Supabase)\") to the changed hunks; confirm against the repository's own `.agents/references/` where a repo-native check exists."
+    },
+    {
+      "id": "FA-007",
+      "category": "frontend-architecture",
+      "title": "Domain System",
+      "enforcement": "established",
+      "detect": "Apply catalog rule FA-007 (\"Domain System\") to the changed hunks; confirm against the repository's own `.agents/references/` where a repo-native check exists."
+    },
+    {
+      "id": "FA-008",
+      "category": "frontend-architecture",
+      "title": "Multi-Portal Architecture",
+      "enforcement": "established",
+      "detect": "Apply catalog rule FA-008 (\"Multi-Portal Architecture\") to the changed hunks; confirm against the repository's own `.agents/references/` where a repo-native check exists."
+    },
+    {
+      "id": "FA-009",
+      "category": "frontend-architecture",
+      "title": "Banned Import Paths (@/adapters, @/core, deep domain imports)",
+      "enforcement": "established",
+      "diff_checkable": "yes",
+      "detect": "Apply catalog rule FA-009 (\"Banned Import Paths (@/adapters, @/core, deep domain imports)\") to the changed hunks; confirm against the repository's own `.agents/references/` where a repo-native check exists."
+    },
+    {
+      "id": "FA-010",
+      "category": "frontend-architecture",
+      "title": "Supabase Client Isolation (services only)",
+      "enforcement": "established",
+      "diff_checkable": "yes",
+      "detect": "Apply catalog rule FA-010 (\"Supabase Client Isolation (services only)\") to the changed hunks; confirm against the repository's own `.agents/references/` where a repo-native check exists."
+    },
+    {
+      "id": "FA-012",
+      "category": "frontend-architecture",
+      "title": "Layout Performance (Suspense inside DashboardLayout)",
+      "enforcement": "established",
+      "detect": "Apply catalog rule FA-012 (\"Layout Performance (Suspense inside DashboardLayout)\") to the changed hunks; confirm against the repository's own `.agents/references/` where a repo-native check exists."
+    },
+    {
+      "id": "FA-013",
+      "category": "frontend-architecture",
+      "title": "Build Order (Types → Services → Hooks → Components → Pages)",
+      "enforcement": "established",
+      "diff_checkable": "process",
+      "detect": "Apply catalog rule FA-013 (\"Build Order (Types → Services → Hooks → Components → Pages)\") to the changed hunks; confirm against the repository's own `.agents/references/` where a repo-native check exists."
+    },
+    {
+      "id": "FA-014",
+      "category": "frontend-architecture",
+      "title": "Transform Rules (transforms live in services)",
+      "enforcement": "established",
+      "detect": "Apply catalog rule FA-014 (\"Transform Rules (transforms live in services)\") to the changed hunks; confirm against the repository's own `.agents/references/` where a repo-native check exists."
+    },
+    {
+      "id": "FA-015",
+      "category": "frontend-architecture",
+      "title": "Service Conventions (fetch/get/create/update/delete)",
+      "enforcement": "established",
+      "detect": "Apply catalog rule FA-015 (\"Service Conventions (fetch/get/create/update/delete)\") to the changed hunks; confirm against the repository's own `.agents/references/` where a repo-native check exists."
+    },
+    {
+      "id": "FA-016",
+      "category": "frontend-architecture",
+      "title": "Domain Priority System",
+      "enforcement": "established",
+      "diff_checkable": "process",
+      "detect": "Apply catalog rule FA-016 (\"Domain Priority System\") to the changed hunks; confirm against the repository's own `.agents/references/` where a repo-native check exists."
+    },
+    {
+      "id": "FA-018",
+      "category": "frontend-architecture",
+      "title": "Required Shared Components",
+      "enforcement": "established",
+      "detect": "Apply catalog rule FA-018 (\"Required Shared Components\") to the changed hunks; confirm against the repository's own `.agents/references/` where a repo-native check exists."
+    },
+    {
+      "id": "FA-019",
+      "category": "frontend-architecture",
+      "title": "Lib vs Domain Split",
+      "enforcement": "established",
+      "detect": "Apply catalog rule FA-019 (\"Lib vs Domain Split\") to the changed hunks; confirm against the repository's own `.agents/references/` where a repo-native check exists."
+    },
+    {
+      "id": "FA-021",
+      "category": "frontend-architecture",
+      "title": "Pages Barrel",
+      "enforcement": "established",
+      "detect": "Apply catalog rule FA-021 (\"Pages Barrel\") to the changed hunks; confirm against the repository's own `.agents/references/` where a repo-native check exists."
+    },
+    {
+      "id": "FA-022",
+      "category": "frontend-architecture",
+      "title": "Cross-Domain Data Patterns",
+      "enforcement": "established",
+      "detect": "Apply catalog rule FA-022 (\"Cross-Domain Data Patterns\") to the changed hunks; confirm against the repository's own `.agents/references/` where a repo-native check exists."
+    },
+    {
+      "id": "FA-023",
+      "category": "frontend-architecture",
+      "title": "domain.json Validation",
+      "enforcement": "established",
+      "detect": "Apply catalog rule FA-023 (\"domain.json Validation\") to the changed hunks; confirm against the repository's own `.agents/references/` where a repo-native check exists."
+    },
+    {
+      "id": "FA-024",
+      "category": "frontend-architecture",
+      "title": "Layout Shell Templates",
+      "enforcement": "established",
+      "detect": "Apply catalog rule FA-024 (\"Layout Shell Templates\") to the changed hunks; confirm against the repository's own `.agents/references/` where a repo-native check exists."
+    },
+    {
+      "id": "FA-025",
+      "category": "frontend-architecture",
+      "title": "Recovery Playbook Order",
+      "enforcement": "established",
+      "diff_checkable": "process",
+      "detect": "Apply catalog rule FA-025 (\"Recovery Playbook Order\") to the changed hunks; confirm against the repository's own `.agents/references/` where a repo-native check exists."
+    },
+    {
+      "id": "TS-001",
+      "category": "typescript-standards",
+      "title": "Enforcement truth is explicit (policy vs tooling)",
+      "enforcement": "established",
+      "diff_checkable": "process",
+      "detect": "Apply catalog rule TS-001 (\"Enforcement truth is explicit (policy vs tooling)\") to the changed hunks; confirm against the repository's own `.agents/references/` where a repo-native check exists."
+    },
+    {
+      "id": "DL-011",
+      "category": "supabase-data-layer",
+      "title": "Cross-Domain FKs",
+      "enforcement": "established",
+      "detect": "Apply catalog rule DL-011 (\"Cross-Domain FKs\") to the changed hunks; confirm against the repository's own `.agents/references/` where a repo-native check exists."
+    },
+    {
+      "id": "DL-019",
+      "category": "supabase-data-layer",
+      "title": "View-Transform Contract Verification",
+      "enforcement": "established",
+      "detect": "Apply catalog rule DL-019 (\"View-Transform Contract Verification\") to the changed hunks; confirm against the repository's own `.agents/references/` where a repo-native check exists."
+    },
+    {
+      "id": "DL-020",
+      "category": "supabase-data-layer",
+      "title": "Bi-Directional Contract Checklist",
+      "enforcement": "established",
+      "detect": "Apply catalog rule DL-020 (\"Bi-Directional Contract Checklist\") to the changed hunks; confirm against the repository's own `.agents/references/` where a repo-native check exists."
+    },
+    {
+      "id": "DL-022",
+      "category": "supabase-data-layer",
+      "title": "Consolidation Pipeline",
+      "enforcement": "established",
+      "diff_checkable": "process",
+      "detect": "Apply catalog rule DL-022 (\"Consolidation Pipeline\") to the changed hunks; confirm against the repository's own `.agents/references/` where a repo-native check exists."
+    },
+    {
+      "id": "DL-023",
+      "category": "supabase-data-layer",
+      "title": "Schema Standards Validation (Pre-Commit/Pre-Push)",
+      "enforcement": "established",
+      "diff_checkable": "process",
+      "detect": "Apply catalog rule DL-023 (\"Schema Standards Validation (Pre-Commit/Pre-Push)\") to the changed hunks; confirm against the repository's own `.agents/references/` where a repo-native check exists."
+    },
+    {
+      "id": "DL-024",
+      "category": "supabase-data-layer",
+      "title": "SQL File Structure Validation (Pre-Commit/Pre-Push)",
+      "enforcement": "established",
+      "diff_checkable": "process",
+      "detect": "Apply catalog rule DL-024 (\"SQL File Structure Validation (Pre-Commit/Pre-Push)\") to the changed hunks; confirm against the repository's own `.agents/references/` where a repo-native check exists."
+    },
+    {
+      "id": "DL-025",
+      "category": "supabase-data-layer",
+      "title": "Seed Behavior Distinctions",
+      "enforcement": "established",
+      "diff_checkable": "process",
+      "detect": "Apply catalog rule DL-025 (\"Seed Behavior Distinctions\") to the changed hunks; confirm against the repository's own `.agents/references/` where a repo-native check exists."
+    },
+    {
+      "id": "DL-026",
+      "category": "supabase-data-layer",
+      "title": "Validation Command Suite",
+      "enforcement": "established",
+      "diff_checkable": "process",
+      "detect": "Apply catalog rule DL-026 (\"Validation Command Suite\") to the changed hunks; confirm against the repository's own `.agents/references/` where a repo-native check exists."
+    },
+    {
+      "id": "DL-027",
+      "category": "supabase-data-layer",
+      "title": "make fresh-db Gotcha",
+      "enforcement": "established",
+      "diff_checkable": "process",
+      "detect": "Apply catalog rule DL-027 (\"make fresh-db Gotcha\") to the changed hunks; confirm against the repository's own `.agents/references/` where a repo-native check exists."
+    },
+    {
+      "id": "DL-033",
+      "category": "supabase-data-layer",
+      "title": "Query Preset Drift Detection",
+      "enforcement": "established",
+      "detect": "Apply catalog rule DL-033 (\"Query Preset Drift Detection\") to the changed hunks; confirm against the repository's own `.agents/references/` where a repo-native check exists."
+    },
+    {
+      "id": "SEC-008",
+      "category": "authentication-security",
+      "title": "MAX_RECIPIENTS Pattern",
+      "enforcement": "established",
+      "detect": "Apply catalog rule SEC-008 (\"MAX_RECIPIENTS Pattern\") to the changed hunks; confirm against the repository's own `.agents/references/` where a repo-native check exists."
+    },
+    {
+      "id": "SEC-009",
+      "category": "authentication-security",
+      "title": "10-Item Security Review Checklist",
+      "enforcement": "established",
+      "detect": "Apply catalog rule SEC-009 (\"10-Item Security Review Checklist\") to the changed hunks; confirm against the repository's own `.agents/references/` where a repo-native check exists."
+    },
+    {
+      "id": "SEC-010",
+      "category": "authentication-security",
+      "title": "Escalation Protocol",
+      "enforcement": "established",
+      "diff_checkable": "process",
+      "detect": "Apply catalog rule SEC-010 (\"Escalation Protocol\") to the changed hunks; confirm against the repository's own `.agents/references/` where a repo-native check exists."
+    },
+    {
+      "id": "SEC-012",
+      "category": "authentication-security",
+      "title": "External Review Token Security",
+      "enforcement": "established",
+      "severity": "high",
+      "detect": "Apply catalog rule SEC-012 (\"External Review Token Security\") to the changed hunks; confirm against the repository's own `.agents/references/` where a repo-native check exists."
+    },
+    {
+      "id": "SEC-021",
+      "category": "authentication-security",
+      "title": "FERPA Compliance",
+      "enforcement": "established",
+      "severity": "high",
+      "detect": "Apply catalog rule SEC-021 (\"FERPA Compliance\") to the changed hunks; confirm against the repository's own `.agents/references/` where a repo-native check exists."
+    },
+    {
+      "id": "SEC-023",
+      "category": "authentication-security",
+      "title": "Escalation Triggers (Data Integrity)",
+      "enforcement": "established",
+      "diff_checkable": "process",
+      "detect": "Apply catalog rule SEC-023 (\"Escalation Triggers (Data Integrity)\") to the changed hunks; confirm against the repository's own `.agents/references/` where a repo-native check exists."
+    },
+    {
+      "id": "SEC-024",
+      "category": "authentication-security",
+      "title": "Escalation Triggers (Architecture)",
+      "enforcement": "established",
+      "diff_checkable": "process",
+      "detect": "Apply catalog rule SEC-024 (\"Escalation Triggers (Architecture)\") to the changed hunks; confirm against the repository's own `.agents/references/` where a repo-native check exists."
+    },
+    {
+      "id": "SEC-025",
+      "category": "authentication-security",
+      "title": "Escalation Triggers (Scope)",
+      "enforcement": "established",
+      "diff_checkable": "process",
+      "detect": "Apply catalog rule SEC-025 (\"Escalation Triggers (Scope)\") to the changed hunks; confirm against the repository's own `.agents/references/` where a repo-native check exists."
+    },
+    {
+      "id": "SEC-026",
+      "category": "authentication-security",
+      "title": "Escalation Report Format",
+      "enforcement": "established",
+      "diff_checkable": "process",
+      "detect": "Apply catalog rule SEC-026 (\"Escalation Report Format\") to the changed hunks; confirm against the repository's own `.agents/references/` where a repo-native check exists."
+    },
+    {
+      "id": "EF-006",
+      "category": "edge-functions-apis",
+      "title": "Necessity Gate (Three-Approach Analysis)",
+      "enforcement": "established",
+      "diff_checkable": "process",
+      "detect": "Apply catalog rule EF-006 (\"Necessity Gate (Three-Approach Analysis)\") to the changed hunks; confirm against the repository's own `.agents/references/` where a repo-native check exists."
+    },
+    {
+      "id": "EF-007",
+      "category": "edge-functions-apis",
+      "title": "Shared Utilities (createEdgeHandler, etc.)",
+      "enforcement": "established",
+      "detect": "Apply catalog rule EF-007 (\"Shared Utilities (createEdgeHandler, etc.)\") to the changed hunks; confirm against the repository's own `.agents/references/` where a repo-native check exists."
+    },
+    {
+      "id": "EF-008",
+      "category": "edge-functions-apis",
+      "title": "Function Registration",
+      "enforcement": "established",
+      "diff_checkable": "checkout",
+      "detect": "Apply catalog rule EF-008 (\"Function Registration\") to the changed hunks; confirm against the repository's own `.agents/references/` where a repo-native check exists."
+    },
+    {
+      "id": "EF-015",
+      "category": "edge-functions-apis",
+      "title": "Rate Limit Presets",
+      "enforcement": "established",
+      "detect": "Apply catalog rule EF-015 (\"Rate Limit Presets\") to the changed hunks; confirm against the repository's own `.agents/references/` where a repo-native check exists."
+    },
+    {
+      "id": "EF-019",
+      "category": "edge-functions-apis",
+      "title": "Decision Framework Flowchart",
+      "enforcement": "established",
+      "diff_checkable": "process",
+      "detect": "Apply catalog rule EF-019 (\"Decision Framework Flowchart\") to the changed hunks; confirm against the repository's own `.agents/references/` where a repo-native check exists."
+    },
+    {
+      "id": "UX-008",
+      "category": "ux-accessibility",
+      "title": "Brand Voice in UI",
+      "enforcement": "established",
+      "detect": "Apply catalog rule UX-008 (\"Brand Voice in UI\") to the changed hunks; confirm against the repository's own `.agents/references/` where a repo-native check exists."
+    },
+    {
+      "id": "UX-020",
+      "category": "ux-accessibility",
+      "title": "Microcopy Rules",
+      "enforcement": "established",
+      "detect": "Apply catalog rule UX-020 (\"Microcopy Rules\") to the changed hunks; confirm against the repository's own `.agents/references/` where a repo-native check exists."
+    },
+    {
+      "id": "UX-021",
+      "category": "ux-accessibility",
+      "title": "Grammar/Style (Extended)",
+      "enforcement": "established",
+      "detect": "Apply catalog rule UX-021 (\"Grammar/Style (Extended)\") to the changed hunks; confirm against the repository's own `.agents/references/` where a repo-native check exists."
+    },
+    {
+      "id": "UX-022",
+      "category": "ux-accessibility",
+      "title": "Word Banks (Avoided)",
+      "enforcement": "established",
+      "diff_checkable": "yes",
+      "detect": "Apply catalog rule UX-022 (\"Word Banks (Avoided)\") to the changed hunks; confirm against the repository's own `.agents/references/` where a repo-native check exists."
+    },
+    {
+      "id": "UX-023",
+      "category": "ux-accessibility",
+      "title": "Time-Aware Greetings",
+      "enforcement": "established",
+      "detect": "Apply catalog rule UX-023 (\"Time-Aware Greetings\") to the changed hunks; confirm against the repository's own `.agents/references/` where a repo-native check exists."
+    },
+    {
+      "id": "IM-006",
+      "category": "incident-monitoring",
+      "title": "Escalation Protocol",
+      "enforcement": "established",
+      "detect": "Apply catalog rule IM-006 (\"Escalation Protocol\") to the changed hunks; confirm against the repository's own `.agents/references/` where a repo-native check exists."
+    },
+    {
+      "id": "IM-009",
+      "category": "incident-monitoring",
+      "title": "Bug Severity Classification",
+      "enforcement": "established",
+      "detect": "Apply catalog rule IM-009 (\"Bug Severity Classification\") to the changed hunks; confirm against the repository's own `.agents/references/` where a repo-native check exists."
+    },
+    {
+      "id": "IM-010",
+      "category": "incident-monitoring",
+      "title": "HIPAA Audit Logging",
+      "enforcement": "established",
+      "severity": "high",
+      "detect": "Apply catalog rule IM-010 (\"HIPAA Audit Logging\") to the changed hunks; confirm against the repository's own `.agents/references/` where a repo-native check exists."
+    },
+    {
+      "id": "IM-011",
+      "category": "incident-monitoring",
+      "title": "Bug Fix RLS Audit Trigger",
+      "enforcement": "established",
+      "detect": "Apply catalog rule IM-011 (\"Bug Fix RLS Audit Trigger\") to the changed hunks; confirm against the repository's own `.agents/references/` where a repo-native check exists."
+    },
+    {
+      "id": "IM-012",
+      "category": "incident-monitoring",
+      "title": "Runtime Quality Audit for Sibling Bugs",
+      "enforcement": "established",
+      "detect": "Apply catalog rule IM-012 (\"Runtime Quality Audit for Sibling Bugs\") to the changed hunks; confirm against the repository's own `.agents/references/` where a repo-native check exists."
+    },
+    {
+      "id": "IM-015",
+      "category": "incident-monitoring",
+      "title": "Audit Log Failure Handling",
+      "enforcement": "established",
+      "severity": "high",
+      "detect": "Apply catalog rule IM-015 (\"Audit Log Failure Handling\") to the changed hunks; confirm against the repository's own `.agents/references/` where a repo-native check exists."
+    },
+    {
+      "id": "A11Y-011",
+      "category": "accessibility-wcag",
+      "title": "Clinical Environment Considerations",
+      "enforcement": "established",
+      "detect": "Apply catalog rule A11Y-011 (\"Clinical Environment Considerations\") to the changed hunks; confirm against the repository's own `.agents/references/` where a repo-native check exists."
+    },
+    {
+      "id": "A11Y-012",
+      "category": "accessibility-wcag",
+      "title": "Audit Failure Criteria",
+      "enforcement": "established",
+      "detect": "Apply catalog rule A11Y-012 (\"Audit Failure Criteria\") to the changed hunks; confirm against the repository's own `.agents/references/` where a repo-native check exists."
+    },
+    {
+      "id": "MOB-014",
+      "category": "mobile-best-practices",
+      "title": "Toast Position Rule",
+      "enforcement": "established",
+      "detect": "Apply catalog rule MOB-014 (\"Toast Position Rule\") to the changed hunks; confirm against the repository's own `.agents/references/` where a repo-native check exists."
+    },
+    {
+      "id": "MOB-015",
+      "category": "mobile-best-practices",
+      "title": "DensityMode Shared Type",
+      "enforcement": "established",
+      "detect": "Apply catalog rule MOB-015 (\"DensityMode Shared Type\") to the changed hunks; confirm against the repository's own `.agents/references/` where a repo-native check exists."
+    },
+    {
+      "id": "PRIV-009",
+      "category": "gdpr-data-privacy",
+      "title": "PHI Detection (18 HIPAA Safe Harbor identifiers)",
+      "enforcement": "established",
+      "severity": "high",
+      "detect": "Apply catalog rule PRIV-009 (\"PHI Detection (18 HIPAA Safe Harbor identifiers)\") to the changed hunks; confirm against the repository's own `.agents/references/` where a repo-native check exists."
+    },
+    {
+      "id": "PRIV-010",
+      "category": "gdpr-data-privacy",
+      "title": "Audit Log Requirements (append-only, 6-year retention)",
+      "enforcement": "established",
+      "severity": "high",
+      "detect": "Apply catalog rule PRIV-010 (\"Audit Log Requirements (append-only, 6-year retention)\") to the changed hunks; confirm against the repository's own `.agents/references/` where a repo-native check exists."
+    },
+    {
+      "id": "PRIV-011",
+      "category": "gdpr-data-privacy",
+      "title": "Sensitive Data Handling (pgp_sym_encrypt, gated decryption)",
+      "enforcement": "established",
+      "severity": "high",
+      "detect": "Apply catalog rule PRIV-011 (\"Sensitive Data Handling (pgp_sym_encrypt, gated decryption)\") to the changed hunks; confirm against the repository's own `.agents/references/` where a repo-native check exists."
+    },
+    {
+      "id": "I18N-009",
+      "category": "internationalization",
+      "title": "i18n Validators",
+      "enforcement": "established",
+      "detect": "Apply catalog rule I18N-009 (\"i18n Validators\") to the changed hunks; confirm against the repository's own `.agents/references/` where a repo-native check exists."
+    },
+    {
+      "id": "I18N-010",
+      "category": "internationalization",
+      "title": "RTL Detection in Pre-Commit",
+      "enforcement": "established",
+      "diff_checkable": "yes",
+      "detect": "Apply catalog rule I18N-010 (\"RTL Detection in Pre-Commit\") to the changed hunks; confirm against the repository's own `.agents/references/` where a repo-native check exists."
+    },
+    {
+      "id": "I18N-017",
+      "category": "internationalization",
+      "title": "i18n Validators (Extended)",
+      "enforcement": "established",
+      "detect": "Apply catalog rule I18N-017 (\"i18n Validators (Extended)\") to the changed hunks; confirm against the repository's own `.agents/references/` where a repo-native check exists."
+    },
+    {
+      "id": "I18N-019",
+      "category": "internationalization",
+      "title": "CSV Export Headers i18n",
+      "enforcement": "established",
+      "detect": "Apply catalog rule I18N-019 (\"CSV Export Headers i18n\") to the changed hunks; confirm against the repository's own `.agents/references/` where a repo-native check exists."
+    }
+  ],
+  "detectors": [
+    {
+      "key": "fa-010-supabase-client-outside-service",
+      "emits_principle_id": "FA-010",
+      "severity": "high",
+      "pattern": "from\\s+['\"]@/integrations/supabase",
+      "message": "Supabase client imported outside a service — only *.service.ts may import it (FA-010).",
+      "include_globs": [
+        "**/*.ts",
+        "**/*.tsx"
+      ],
+      "exclude_globs": [
+        "**/*.service.ts"
+      ]
+    },
+    {
+      "key": "fa-009-banned-root-import",
+      "emits_principle_id": "FA-009",
+      "severity": "medium",
+      "pattern": "from\\s+['\"]@/(adapters|core)/",
+      "message": "Banned import path @/adapters or @/core (FA-009).",
+      "include_globs": [
+        "**/*.ts",
+        "**/*.tsx"
+      ]
+    },
+    {
+      "key": "fa-009-deep-domain-import",
+      "emits_principle_id": "FA-009",
+      "severity": "low",
+      "pattern": "from\\s+['\"]@/domains/[a-z-]+/(hooks|services|types)/",
+      "message": "Deep domain import — cross-domain imports must go through the domain barrel (FA-009).",
+      "include_globs": [
+        "**/*.ts",
+        "**/*.tsx"
+      ]
+    }
+  ],
+  "overlays": {
+    "ai-integration": {
+      "path_prefixes": [
+        "src/domains/ai-integration/",
+        "src/components/organisms/ai-integration/",
+        "supabase/migrations/domains/*_ai_integration/"
+      ],
+      "guidance": "Oracle domain overlay for `ai-integration`. Load this domain's conventions alongside the surface rubric when files under these prefixes change."
+    },
+    "analytics": {
+      "path_prefixes": [
+        "src/domains/analytics/",
+        "src/components/organisms/analytics/",
+        "supabase/migrations/domains/*_analytics/"
+      ],
+      "guidance": "Oracle domain overlay for `analytics`. Load this domain's conventions alongside the surface rubric when files under these prefixes change."
+    },
+    "audit": {
+      "path_prefixes": [
+        "src/domains/audit/",
+        "src/components/organisms/audit/",
+        "supabase/migrations/domains/*_audit/"
+      ],
+      "guidance": "Oracle domain overlay for `audit`. Load this domain's conventions alongside the surface rubric when files under these prefixes change."
+    },
+    "benefits": {
+      "path_prefixes": [
+        "src/domains/benefits/",
+        "src/components/organisms/benefits/",
+        "supabase/migrations/domains/*_benefits/"
+      ],
+      "guidance": "Oracle domain overlay for `benefits`. Load this domain's conventions alongside the surface rubric when files under these prefixes change."
+    },
+    "calendar": {
+      "path_prefixes": [
+        "src/domains/calendar/",
+        "src/components/organisms/calendar/",
+        "supabase/migrations/domains/*_calendar/"
+      ],
+      "guidance": "Oracle domain overlay for `calendar`. Load this domain's conventions alongside the surface rubric when files under these prefixes change."
+    },
+    "cases": {
+      "path_prefixes": [
+        "src/domains/cases/",
+        "src/components/organisms/cases/",
+        "supabase/migrations/domains/*_cases/"
+      ],
+      "guidance": "Oracle domain overlay for `cases`. Load this domain's conventions alongside the surface rubric when files under these prefixes change."
+    },
+    "charts": {
+      "path_prefixes": [
+        "src/domains/charts/",
+        "src/components/organisms/charts/",
+        "supabase/migrations/domains/*_charts/"
+      ],
+      "guidance": "Oracle domain overlay for `charts`. Load this domain's conventions alongside the surface rubric when files under these prefixes change."
+    },
+    "chgme": {
+      "path_prefixes": [
+        "src/domains/chgme/",
+        "src/components/organisms/chgme/",
+        "supabase/migrations/domains/*_chgme/"
+      ],
+      "guidance": "Oracle domain overlay for `chgme`. Load this domain's conventions alongside the surface rubric when files under these prefixes change."
+    },
+    "clinical-schedules": {
+      "path_prefixes": [
+        "src/domains/clinical-schedules/",
+        "src/components/organisms/clinical-schedules/",
+        "supabase/migrations/domains/*_clinical_schedules/"
+      ],
+      "guidance": "Oracle domain overlay for `clinical-schedules`. Load this domain's conventions alongside the surface rubric when files under these prefixes change."
+    },
+    "curriculum": {
+      "path_prefixes": [
+        "src/domains/curriculum/",
+        "src/components/organisms/curriculum/",
+        "supabase/migrations/domains/*_curriculum/"
+      ],
+      "guidance": "Oracle domain overlay for `curriculum`. Load this domain's conventions alongside the surface rubric when files under these prefixes change."
+    },
+    "dashboard": {
+      "path_prefixes": [
+        "src/domains/dashboard/",
+        "src/components/organisms/dashboard/",
+        "supabase/migrations/domains/*_dashboard/"
+      ],
+      "guidance": "Oracle domain overlay for `dashboard`. Load this domain's conventions alongside the surface rubric when files under these prefixes change."
+    },
+    "data-exchange": {
+      "path_prefixes": [
+        "src/domains/data-exchange/",
+        "src/components/organisms/data-exchange/",
+        "supabase/migrations/domains/*_data_exchange/"
+      ],
+      "guidance": "Oracle domain overlay for `data-exchange`. Load this domain's conventions alongside the surface rubric when files under these prefixes change."
+    },
+    "documents": {
+      "path_prefixes": [
+        "src/domains/documents/",
+        "src/components/organisms/documents/",
+        "supabase/migrations/domains/*_documents/"
+      ],
+      "guidance": "Oracle domain overlay for `documents`. Load this domain's conventions alongside the surface rubric when files under these prefixes change."
+    },
+    "external-integrations": {
+      "path_prefixes": [
+        "src/domains/external-integrations/",
+        "src/components/organisms/external-integrations/",
+        "supabase/migrations/domains/*_external_integrations/"
+      ],
+      "guidance": "Oracle domain overlay for `external-integrations`. Load this domain's conventions alongside the surface rubric when files under these prefixes change."
+    },
+    "forms": {
+      "path_prefixes": [
+        "src/domains/forms/",
+        "src/components/organisms/forms/",
+        "supabase/migrations/domains/*_forms/"
+      ],
+      "guidance": "Oracle domain overlay for `forms`. Load this domain's conventions alongside the surface rubric when files under these prefixes change."
+    },
+    "framework": {
+      "path_prefixes": [
+        "src/domains/framework/",
+        "src/components/organisms/framework/",
+        "supabase/migrations/domains/*_framework/"
+      ],
+      "guidance": "Oracle domain overlay for `framework`. Load this domain's conventions alongside the surface rubric when files under these prefixes change."
+    },
+    "goals": {
+      "path_prefixes": [
+        "src/domains/goals/",
+        "src/components/organisms/goals/",
+        "supabase/migrations/domains/*_goals/"
+      ],
+      "guidance": "Oracle domain overlay for `goals`. Load this domain's conventions alongside the surface rubric when files under these prefixes change."
+    },
+    "gradebook": {
+      "path_prefixes": [
+        "src/domains/gradebook/",
+        "src/components/organisms/gradebook/",
+        "supabase/migrations/domains/*_gradebook/"
+      ],
+      "guidance": "Oracle domain overlay for `gradebook`. Load this domain's conventions alongside the surface rubric when files under these prefixes change."
+    },
+    "groups": {
+      "path_prefixes": [
+        "src/domains/groups/",
+        "src/components/organisms/groups/",
+        "supabase/migrations/domains/*_groups/"
+      ],
+      "guidance": "Oracle domain overlay for `groups`. Load this domain's conventions alongside the surface rubric when files under these prefixes change."
+    },
+    "institution-standards": {
+      "path_prefixes": [
+        "src/domains/institution-standards/",
+        "src/components/organisms/institution-standards/",
+        "supabase/migrations/domains/*_institution_standards/"
+      ],
+      "guidance": "Oracle domain overlay for `institution-standards`. Load this domain's conventions alongside the surface rubric when files under these prefixes change."
+    },
+    "iris": {
+      "path_prefixes": [
+        "src/domains/iris/",
+        "src/components/organisms/iris/",
+        "supabase/migrations/domains/*_iris/"
+      ],
+      "guidance": "Oracle domain overlay for `iris`. Load this domain's conventions alongside the surface rubric when files under these prefixes change."
+    },
+    "legacy-sync": {
+      "path_prefixes": [
+        "src/domains/legacy-sync/",
+        "src/components/organisms/legacy-sync/",
+        "supabase/migrations/domains/*_legacy_sync/"
+      ],
+      "guidance": "Oracle domain overlay for `legacy-sync`. Load this domain's conventions alongside the surface rubric when files under these prefixes change."
+    },
+    "messaging": {
+      "path_prefixes": [
+        "src/domains/messaging/",
+        "src/components/organisms/messaging/",
+        "supabase/migrations/domains/*_messaging/"
+      ],
+      "guidance": "Oracle domain overlay for `messaging`. Load this domain's conventions alongside the surface rubric when files under these prefixes change."
+    },
+    "notes": {
+      "path_prefixes": [
+        "src/domains/notes/",
+        "src/components/organisms/notes/",
+        "supabase/migrations/domains/*_notes/"
+      ],
+      "guidance": "Oracle domain overlay for `notes`. Load this domain's conventions alongside the surface rubric when files under these prefixes change."
+    },
+    "notifications": {
+      "path_prefixes": [
+        "src/domains/notifications/",
+        "src/components/organisms/notifications/",
+        "supabase/migrations/domains/*_notifications/"
+      ],
+      "guidance": "Oracle domain overlay for `notifications`. Load this domain's conventions alongside the surface rubric when files under these prefixes change."
+    },
+    "optimizer": {
+      "path_prefixes": [
+        "src/domains/optimizer/",
+        "src/components/organisms/optimizer/",
+        "supabase/migrations/domains/*_optimizer/"
+      ],
+      "guidance": "Oracle domain overlay for `optimizer`. Load this domain's conventions alongside the surface rubric when files under these prefixes change."
+    },
+    "organizations": {
+      "path_prefixes": [
+        "src/domains/organizations/",
+        "src/components/organisms/organizations/",
+        "supabase/migrations/domains/*_organizations/"
+      ],
+      "guidance": "Oracle domain overlay for `organizations`. Load this domain's conventions alongside the surface rubric when files under these prefixes change."
+    },
+    "people": {
+      "path_prefixes": [
+        "src/domains/people/",
+        "src/components/organisms/people/",
+        "supabase/migrations/domains/*_people/"
+      ],
+      "guidance": "Oracle domain overlay for `people`. Load this domain's conventions alongside the surface rubric when files under these prefixes change."
+    },
+    "platform": {
+      "path_prefixes": [
+        "src/domains/platform/",
+        "src/components/organisms/platform/",
+        "supabase/migrations/domains/*_platform/"
+      ],
+      "guidance": "Oracle domain overlay for `platform`. Load this domain's conventions alongside the surface rubric when files under these prefixes change."
+    },
+    "portfolio": {
+      "path_prefixes": [
+        "src/domains/portfolio/",
+        "src/components/organisms/portfolio/",
+        "supabase/migrations/domains/*_portfolio/"
+      ],
+      "guidance": "Oracle domain overlay for `portfolio`. Load this domain's conventions alongside the surface rubric when files under these prefixes change."
+    },
+    "professional-development": {
+      "path_prefixes": [
+        "src/domains/professional-development/",
+        "src/components/organisms/professional-development/",
+        "supabase/migrations/domains/*_professional_development/"
+      ],
+      "guidance": "Oracle domain overlay for `professional-development`. Load this domain's conventions alongside the surface rubric when files under these prefixes change."
+    },
+    "program-benchmarks": {
+      "path_prefixes": [
+        "src/domains/program-benchmarks/",
+        "src/components/organisms/program-benchmarks/",
+        "supabase/migrations/domains/*_program_benchmarks/"
+      ],
+      "guidance": "Oracle domain overlay for `program-benchmarks`. Load this domain's conventions alongside the surface rubric when files under these prefixes change."
+    },
+    "qa": {
+      "path_prefixes": [
+        "src/domains/qa/",
+        "src/components/organisms/qa/",
+        "supabase/migrations/domains/*_qa/"
+      ],
+      "guidance": "Oracle domain overlay for `qa`. Load this domain's conventions alongside the surface rubric when files under these prefixes change."
+    },
+    "qa-testing": {
+      "path_prefixes": [
+        "src/domains/qa-testing/",
+        "src/components/organisms/qa-testing/",
+        "supabase/migrations/domains/*_qa_testing/"
+      ],
+      "guidance": "Oracle domain overlay for `qa-testing`. Load this domain's conventions alongside the surface rubric when files under these prefixes change."
+    },
+    "questions": {
+      "path_prefixes": [
+        "src/domains/questions/",
+        "src/components/organisms/questions/",
+        "supabase/migrations/domains/*_questions/"
+      ],
+      "guidance": "Oracle domain overlay for `questions`. Load this domain's conventions alongside the surface rubric when files under these prefixes change."
+    },
+    "reference-data": {
+      "path_prefixes": [
+        "src/domains/reference-data/",
+        "src/components/organisms/reference-data/",
+        "supabase/migrations/domains/*_reference_data/"
+      ],
+      "guidance": "Oracle domain overlay for `reference-data`. Load this domain's conventions alongside the surface rubric when files under these prefixes change."
+    },
+    "requests": {
+      "path_prefixes": [
+        "src/domains/requests/",
+        "src/components/organisms/requests/",
+        "supabase/migrations/domains/*_requests/"
+      ],
+      "guidance": "Oracle domain overlay for `requests`. Load this domain's conventions alongside the surface rubric when files under these prefixes change."
+    },
+    "resources": {
+      "path_prefixes": [
+        "src/domains/resources/",
+        "src/components/organisms/resources/",
+        "supabase/migrations/domains/*_resources/"
+      ],
+      "guidance": "Oracle domain overlay for `resources`. Load this domain's conventions alongside the surface rubric when files under these prefixes change."
+    },
+    "review-cycles": {
+      "path_prefixes": [
+        "src/domains/review-cycles/",
+        "src/components/organisms/review-cycles/",
+        "supabase/migrations/domains/*_review_cycles/"
+      ],
+      "guidance": "Oracle domain overlay for `review-cycles`. Load this domain's conventions alongside the surface rubric when files under these prefixes change."
+    },
+    "risks": {
+      "path_prefixes": [
+        "src/domains/risks/",
+        "src/components/organisms/risks/",
+        "supabase/migrations/domains/*_risks/"
+      ],
+      "guidance": "Oracle domain overlay for `risks`. Load this domain's conventions alongside the surface rubric when files under these prefixes change."
+    },
+    "telemetry": {
+      "path_prefixes": [
+        "src/domains/telemetry/",
+        "src/components/organisms/telemetry/",
+        "supabase/migrations/domains/*_telemetry/"
+      ],
+      "guidance": "Oracle domain overlay for `telemetry`. Load this domain's conventions alongside the surface rubric when files under these prefixes change."
+    },
+    "work-hours": {
+      "path_prefixes": [
+        "src/domains/work-hours/",
+        "src/components/organisms/work-hours/",
+        "supabase/migrations/domains/*_work_hours/"
+      ],
+      "guidance": "Oracle domain overlay for `work-hours`. Load this domain's conventions alongside the surface rubric when files under these prefixes change."
+    },
+    "permissions": {
+      "activate_on_surfaces": [
+        "rls",
+        "security_privacy"
+      ],
+      "guidance": "Authorization overlay. Apply to any change touching RLS policies, permission checks or security-definer functions."
+    },
+    "portals": {
+      "activate_on_surfaces": [
+        "frontend",
+        "data_layer"
+      ],
+      "guidance": "Portal behaviour overlay: organization / institution / admin / personal differences. Apply when a change alters behaviour that varies by portal."
+    }
+  }
+}

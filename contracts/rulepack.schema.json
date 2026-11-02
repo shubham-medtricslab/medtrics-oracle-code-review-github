@@ -105,19 +105,24 @@
       "description": "Which reviewer surfaces a changed path activates.",
       "additionalProperties": { "type": "array", "items": { "type": "string" } }
     },
-    "severity_floors": {
+    "suggested_severity_floors": {
       "type": "object",
-      "description": "Per-surface severity floor contributed by this pack, e.g. rls -> high.",
+      "description": "ADVISORY ONLY (contract v1.2). A suggested per-surface floor, e.g. rls -> high, used to seed org config. It MUST NOT be applied during rule materialization. Severity floors are a FINDING-TIME policy: v0.5.0 kept them in config (`principles.surface_overrides.*.severity_floor`) and in the reviewer prompt, never in `rubric.py build_rules()`. The proof is in the golden snapshot: DL-031 is surface `rls` at severity `medium`. If the floor were part of materialization it would be `high`. Floors are also per-repo configurable, so baking them into static pack data would make pack content depend on a runtime setting.",
       "additionalProperties": { "$ref": "#/$defs/severity" }
     },
     "overlays": {
       "type": "object",
-      "description": "Domain overlays keyed by domain id, with path prefixes that resolve to them.",
+      "description": "Overlays keyed by id. Activated by path prefix, by surface, or both. Cross-cutting overlays such as `permissions` (applies to any RLS/policy change) have no path prefixes and activate on a surface instead.",
       "additionalProperties": {
         "type": "object",
         "additionalProperties": false,
         "properties": {
           "path_prefixes": { "type": "array", "items": { "type": "string" } },
+          "activate_on_surfaces": {
+            "type": "array",
+            "items": { "$ref": "#/$defs/surface" },
+            "description": "Contract v1.2. An overlay with neither path_prefixes nor activate_on_surfaces can never fire and is a validation error - better a loud failure than silently dead guidance."
+          },
           "guidance": { "type": "string" }
         }
       }
