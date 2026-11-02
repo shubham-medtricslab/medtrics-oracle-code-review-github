@@ -72,6 +72,10 @@
             "description": "Content-anchored: hash(path, principle_id, normalized_evidence). NOT position-anchored - a line-number key re-posts every finding on every push."
           },
           "principle_id": { "type": "string" },
+          "detector_key": {
+            "type": ["string", "null"],
+            "description": "The detector that produced this finding, when one did; null when a reviewer raised it unaided. Distinct from principle_id because two detectors legitimately emit the same principle at different severities - that is the FA-009 case, where deriving the id from the key via split('b') collapsed them into one. Including it in the dedup anchor makes that separation structural rather than incidental."
+          },
           "rulepack_id": { "type": "string" },
           "rulepack_version": { "type": "string" },
           "severity": { "enum": ["info", "low", "medium", "high", "critical"] },
