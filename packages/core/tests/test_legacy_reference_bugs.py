@@ -16,6 +16,7 @@ failures:
 
 Stdlib only.
 """
+import functools
 import os
 import sys
 import unittest
@@ -37,6 +38,23 @@ from write_path_contract import (  # noqa: E402
 SHOW_FAILURES = os.environ.get("AIREVIEW_SHOW_LEGACY_FAILURES") == "1"
 
 
+def _expected_failure(fn):
+    """`unittest.expectedFailure` that does not mutate the function it is given.
+
+    The stdlib version sets `__unittest_expecting_failure__` on the function
+    object and returns THAT SAME OBJECT. Applied to a method inherited from a
+    shared mixin, it therefore marks the mixin's function - and the new
+    implementation's binding of the same mixin inherits the mark and reports
+    seventeen unexpected successes. Wrapping keeps the mark on a copy that
+    belongs only to this class.
+    """
+    @functools.wraps(fn)
+    def wrapper(*args, **kwargs):
+        return fn(*args, **kwargs)
+    wrapper.__unittest_expecting_failure__ = True
+    return wrapper
+
+
 def expect_failures(cls):
     """Mark every inherited contract test on `cls` as an expected failure.
 
@@ -51,7 +69,7 @@ def expect_failures(cls):
             continue
         fn = getattr(cls, name)
         if callable(fn):
-            setattr(cls, name, unittest.expectedFailure(fn))
+            setattr(cls, name, _expected_failure(fn))
     return cls
 
 
