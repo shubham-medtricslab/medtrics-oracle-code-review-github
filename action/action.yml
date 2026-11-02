@@ -1,0 +1,669 @@
+name: 'AI Code Review'
+description: >-
+  Repo-agnostic AI code review. Runs the deterministic pipeline, spawns one
+  agent per reviewer surface, and reports through a check run that always
+  completes. Non-blocking and dry-run by default.
+author: 'medtrics'
+
+branding:
+  icon: 'eye'
+  color: 'purple'
+
+# ---------------------------------------------------------------------------
+# Why a composite action rather than a container or JS action:
+#
+#   - packages/core is stdlib-only, so there is nothing to install. A container
+#     would add an image pull to a job whose entire cost model is the agent call.
+#   - Composite steps let the App token be minted twice, in separate steps, so
+#     the step that runs the agent provably never has it in its environment.
+#     That is a property of the process tree rather than a convention someone
+#     has to remember.
+#
+# One convention runs through every `run:` block below: NOTHING dynamic is
+# interpolated into shell source. Every value arrives through `env:` and is
+# referenced as "$VAR". Branch names reach this action from the event payload
+# and git permits `$`, backticks, quotes, `;` and `&` in a ref name, so
+# `${{ ... }}` inside a script body is a command-injection vector, not a style
+# preference.
+# ---------------------------------------------------------------------------
+inputs:
+  # --- review policy -------------------------------------------------------
+  rulepacks:
+    description: >-
+      Rulepack IDs to load, comma- or newline-separated. Packs resolve by ID
+      against the registry; paths are rejected. Empty means the core default set.
+    required: false
+    default: ''
+  severity_floor:
+    description: 'Lowest severity reported: info | low | medium | high | critical.'
+    required: false
+    default: 'medium'
+  model_tier:
+    description: 'Model tier for reviewer agents: economy | standard | premium.'
+    required: false
+    default: 'standard'
+  max_changed_files:
+    description: >-
+      Refuse to review a pull request touching more than this many files. Core
+      exits 1 (policy refusal) and the check concludes neutral.
+    required: false
+    default: '400'
+  reviewer_timeout_seconds:
+    description: 'Wall-clock budget for a single reviewer surface.'
+    required: false
+    default: '600'
+  max_budget_usd:
+    description: 'Per-run spend ceiling. Empty leaves it to core policy.'
+    required: false
+    default: ''
+
+  # --- safety switches (org-controlled; a repo config can never set these) --
+  dry_run:
+    description: >-
+      Compute the review but post nothing. DEFAULT TRUE. Adopt with this on,
+      read a few runs, then turn it off deliberately.
+    required: false
+    default: 'true'
+  blocking:
+    description: >-
+      Allow the check run to conclude failure/action_required. DEFAULT FALSE.
+      With this off the check is always neutral and cannot block a merge.
+    required: false
+    default: 'false'
+  enabled:
+    description: 'Set false to skip the reviewer while leaving the workflow wired up.'
+    required: false
+    default: 'true'
+  kill_switch:
+    description: >-
+      Org-level emergency stop. When true the reviewer does not run and the
+      check concludes neutral. Kept separate from `enabled` so a repo opt-out
+      and an org-wide stop are distinguishable in the logs.
+    required: false
+    default: 'false'
+  skip_forks:
+    description: >-
+      Skip pull requests from forks. DEFAULT TRUE, and you should leave it true.
+      See the fork section of action/README.md.
+    required: false
+    default: 'true'
+  skip_drafts:
+    description: 'Skip draft pull requests. DEFAULT TRUE.'
+    required: false
+    default: 'true'
+
+  # --- plumbing ------------------------------------------------------------
+  mode:
+    description: 'review (default) or reap. `reap` closes dangling check runs and exits.'
+    required: false
+    default: 'review'
+  check_name:
+    description: >-
+      Check-run name. This is the string you mark as a required check, so
+      changing it changes your branch protection.
+    required: false
+    default: 'AI Review'
+  config_path:
+    description: 'Review config path, read from the BASE ref. Never from the PR head.'
+    required: false
+    default: '.github/ai-review.yml'
+  work_dir:
+    description: 'Scratch directory for the checkout and artifacts.'
+    required: false
+    default: '.aireview-work'
+  claude_code_version:
+    description: >-
+      Pinned Claude Code version. 2.1.175 is the version the documented runtime
+      facts were verified against; floating this is a silent behaviour change.
+    required: false
+    default: '2.1.175'
+  job_timeout_seconds:
+    description: >-
+      Hard ceiling on the review phase. Composite steps cannot use
+      timeout-minutes, so this is enforced with coreutils `timeout`.
+    required: false
+    default: '1800'
+
+  # --- credentials ---------------------------------------------------------
+  app_id:
+    description: 'GitHub App ID. Used to mint short-lived installation tokens.'
+    required: true
+  app_private_key:
+    description: >-
+      GitHub App private key. Never reaches the agent step: it is consumed only
+      by the token-minting steps, which run before fetch and before post.
+    required: true
+  anthropic_api_key:
+    description: >-
+      Anthropic API key. Required: `claude --bare` does not read subscription
+      login or the keychain, and fails "Not logged in" without it.
+    required: true
+
+outputs:
+  run_record_path:
+    description: 'Path to the emitted run record (contracts/run-record.schema.json).'
+    value: ${{ steps.paths.outputs.run_record }}
+  verdict:
+    description: 'comment | request_changes | needs_discussion. Empty when no review ran.'
+    value: ${{ steps.finalize.outputs.verdict }}
+  check_conclusion:
+    description: 'The conclusion actually posted to the check run.'
+    value: ${{ steps.finalize.outputs.conclusion }}
+  outcome:
+    description: 'ok | policy_refusal | agent_failed | timed_out | cancelled | skipped_* | infra_error.'
+    value: ${{ steps.outcome.outputs.value }}
+
+runs:
+  using: composite
+  steps:
+    # -----------------------------------------------------------------------
+    # 0. Decide whether to run at all, before anything costs money or touches
+    #    a credential.
+    # -----------------------------------------------------------------------
+    - id: preflight
+      shell: bash
+      env:
+        ENABLED: ${{ inputs.enabled }}
+        KILL_SWITCH: ${{ inputs.kill_switch }}
+        SKIP_FORKS: ${{ inputs.skip_forks }}
+        SKIP_DRAFTS: ${{ inputs.skip_drafts }}
+        IS_FORK: ${{ github.event.pull_request.head.repo.fork }}
+        IS_DRAFT: ${{ github.event.pull_request.draft }}
+        PR_NUMBER: ${{ github.event.pull_request.number }}
+        HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        BASE_SHA: ${{ github.event.pull_request.base.sha }}
+        BASE_REF: ${{ github.event.pull_request.base.ref }}
+        WORK_DIR: ${{ inputs.work_dir }}
+      run: |
+        set -uo pipefail
+
+        if [ -z "${PR_NUMBER:-}" ]; then
+          echo "::error::This action requires a pull_request event payload."
+          {
+            echo "skip=true"
+            echo "skip_outcome=infra_error"
+          } >> "$GITHUB_OUTPUT"
+          exit 0
+        fi
+
+        skip=false
+        skip_outcome=""
+
+        # A fork pull request gets a read-only token and no secrets, by
+        # GitHub's design. `pull_request_target` would lift that by running
+        # with base-repo privileges against attacker-controlled code, which
+        # hands a fork author the keys. We skip instead. See action/README.md.
+        if [ "${SKIP_FORKS}" = "true" ] && [ "${IS_FORK}" = "true" ]; then
+          skip=true; skip_outcome="skipped_fork"
+        elif [ "${SKIP_DRAFTS}" = "true" ] && [ "${IS_DRAFT}" = "true" ]; then
+          # `opened` fires for drafts too, and paying to review work in
+          # progress is the easiest way to burn the budget for no benefit.
+          skip=true; skip_outcome="skipped_draft"
+        elif [ "${KILL_SWITCH}" = "true" ] || [ "${ENABLED}" != "true" ]; then
+          skip=true; skip_outcome="skipped_disabled"
+        fi
+
+        {
+          echo "skip=${skip}"
+          echo "skip_outcome=${skip_outcome}"
+          echo "pr_number=${PR_NUMBER}"
+          echo "head_sha=${HEAD_SHA}"
+          echo "base_sha=${BASE_SHA}"
+          echo "base_ref=${BASE_REF}"
+          echo "checkout_dir=${WORK_DIR}/pr"
+        } >> "$GITHUB_OUTPUT"
+
+        echo "preflight: skip=${skip} reason=${skip_outcome:-none} fork=${IS_FORK:-false} draft=${IS_DRAFT:-false}"
+
+    - id: paths
+      shell: bash
+      env:
+        WORK_DIR: ${{ inputs.work_dir }}
+        ACTION_PATH: ${{ github.action_path }}
+      run: |
+        set -euo pipefail
+        mkdir -p "${WORK_DIR}/artifacts" "${WORK_DIR}/prfetch"
+        {
+          echo "prfetch=${WORK_DIR}/prfetch"
+          echo "run_record=${WORK_DIR}/artifacts/run-record.json"
+          echo "config=${WORK_DIR}/artifacts/resolved-config.json"
+          echo "notes=${WORK_DIR}/artifacts/config-notes.json"
+          echo "scripts=${ACTION_PATH}/scripts"
+          echo "core=${ACTION_PATH}/../packages/core"
+        } >> "$GITHUB_OUTPUT"
+
+    # A cancelled job still has to finish its check run, and `job.status` is
+    # not reliably available to composite steps. This probe is the portable
+    # way to carry "we were cancelled" into a later `always()` step.
+    - id: cancel_probe
+      if: ${{ cancelled() }}
+      shell: bash
+      run: echo "cancelled=true" >> "$GITHUB_OUTPUT"
+
+    # -----------------------------------------------------------------------
+    # 1. Mint token #1 and open the check run.
+    #
+    #    Opened on receipt so the pull request shows the review is queued
+    #    rather than showing nothing for several minutes. Scoped to exactly
+    #    what the next three steps need, and no wider.
+    # -----------------------------------------------------------------------
+    - id: token_open
+      if: ${{ inputs.mode != 'reap' && steps.preflight.outputs.skip != 'true' }}
+      uses: actions/create-github-app-token@v2
+      with:
+        app-id: ${{ inputs.app_id }}
+        private-key: ${{ inputs.app_private_key }}
+        permission-contents: read
+        permission-checks: write
+        permission-pull-requests: read
+
+    - id: open_check
+      if: ${{ inputs.mode != 'reap' && steps.preflight.outputs.skip != 'true' }}
+      shell: bash
+      env:
+        GITHUB_TOKEN: ${{ steps.token_open.outputs.token }}
+        SCRIPTS: ${{ steps.paths.outputs.scripts }}
+        REPO: ${{ github.repository }}
+        HEAD_SHA: ${{ steps.preflight.outputs.head_sha }}
+        CHECK_NAME: ${{ inputs.check_name }}
+        RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+      run: |
+        set -uo pipefail
+        python3 "${SCRIPTS}/check_run.py" create \
+          --repo "${REPO}" \
+          --sha "${HEAD_SHA}" \
+          --name "${CHECK_NAME}" \
+          --details-url "${RUN_URL}"
+        # Creation failing is survivable: the finalizer posts an
+        # already-completed run instead. Never fail the job here.
+        exit 0
+
+    # -----------------------------------------------------------------------
+    # 2. Check out the pull request head.
+    #
+    #    `persist-credentials: false` matters. The checkout is attacker-authored
+    #    and the parent reads things out of it -- .env, .git/config, .claude/,
+    #    .mcp.json -- so a token written into .git/config would be sitting
+    #    inside the hostile workspace.
+    #
+    #    `ref` is the real head SHA, not refs/pull/N/merge: the run record
+    #    anchors review comments to head_sha and refuses to post if the live
+    #    head has moved, so reviewing a synthetic merge commit would break that.
+    # -----------------------------------------------------------------------
+    - name: Check out pull request head
+      if: ${{ inputs.mode != 'reap' && steps.preflight.outputs.skip != 'true' }}
+      uses: actions/checkout@v4
+      with:
+        repository: ${{ github.repository }}
+        ref: ${{ steps.preflight.outputs.head_sha }}
+        path: ${{ steps.preflight.outputs.checkout_dir }}
+        token: ${{ steps.token_open.outputs.token }}
+        persist-credentials: false
+        fetch-depth: 0
+
+    - name: Fetch the base branch
+      if: ${{ inputs.mode != 'reap' && steps.preflight.outputs.skip != 'true' }}
+      shell: bash
+      env:
+        CHECKOUT_DIR: ${{ steps.preflight.outputs.checkout_dir }}
+        BASE_REF: ${{ steps.preflight.outputs.base_ref }}
+        BASE_SHA: ${{ steps.preflight.outputs.base_sha }}
+      run: |
+        set -uo pipefail
+        # Needed for the merge-base. Non-fatal by design: if it fails,
+        # resolve_config reports repo_layer_source=pr-head and core refuses to
+        # apply that layer, rather than anyone guessing the head config is safe.
+        git -C "${CHECKOUT_DIR}" fetch --no-tags origin \
+          "+refs/heads/${BASE_REF}:refs/remotes/origin/${BASE_REF}" ||
+          echo "::warning::could not fetch the base branch; config will fall back to org policy"
+        git -C "${CHECKOUT_DIR}" fetch --no-tags origin "${BASE_SHA}" || true
+        exit 0
+
+    # -----------------------------------------------------------------------
+    # 3. Resolve config from the BASE ref.
+    #
+    #    Read from the head, this file would let a contributor disable the
+    #    security reviewer in the very pull request that needs it.
+    # -----------------------------------------------------------------------
+    - id: config
+      if: ${{ inputs.mode != 'reap' && steps.preflight.outputs.skip != 'true' }}
+      shell: bash
+      env:
+        SCRIPTS: ${{ steps.paths.outputs.scripts }}
+        CHECKOUT_DIR: ${{ steps.preflight.outputs.checkout_dir }}
+        HEAD_SHA: ${{ steps.preflight.outputs.head_sha }}
+        BASE_SHA: ${{ steps.preflight.outputs.base_sha }}
+        BASE_REF: ${{ steps.preflight.outputs.base_ref }}
+        CONFIG_PATH: ${{ inputs.config_path }}
+        OUT_CONFIG: ${{ steps.paths.outputs.config }}
+        OUT_NOTES: ${{ steps.paths.outputs.notes }}
+        IN_ENABLED: ${{ inputs.enabled }}
+        IN_DRY_RUN: ${{ inputs.dry_run }}
+        IN_BLOCKING: ${{ inputs.blocking }}
+        IN_KILL_SWITCH: ${{ inputs.kill_switch }}
+        IN_RULEPACKS: ${{ inputs.rulepacks }}
+        IN_MODEL_TIER: ${{ inputs.model_tier }}
+        IN_SEVERITY_FLOOR: ${{ inputs.severity_floor }}
+        IN_MAX_CHANGED_FILES: ${{ inputs.max_changed_files }}
+        IN_REVIEWER_TIMEOUT: ${{ inputs.reviewer_timeout_seconds }}
+        IN_MAX_BUDGET: ${{ inputs.max_budget_usd }}
+      run: |
+        set -uo pipefail
+        python3 "${SCRIPTS}/resolve_config.py" \
+          --repo-dir "${CHECKOUT_DIR}" \
+          --head-sha "${HEAD_SHA}" \
+          --base-sha "${BASE_SHA}" \
+          --base-ref "${BASE_REF}" \
+          --config-path "${CONFIG_PATH}" \
+          --out "${OUT_CONFIG}" \
+          --notes-out "${OUT_NOTES}" \
+          --enabled "${IN_ENABLED}" \
+          --dry-run "${IN_DRY_RUN}" \
+          --blocking "${IN_BLOCKING}" \
+          --kill-switch "${IN_KILL_SWITCH}" \
+          --rulepacks "${IN_RULEPACKS}" \
+          --model-tier "${IN_MODEL_TIER}" \
+          --severity-floor "${IN_SEVERITY_FLOOR}" \
+          --max-changed-files "${IN_MAX_CHANGED_FILES}" \
+          --reviewer-timeout-seconds "${IN_REVIEWER_TIMEOUT}" \
+          --max-budget-usd "${IN_MAX_BUDGET}"
+        code=$?
+        echo "code=${code}" >> "$GITHUB_OUTPUT"
+        exit 0
+
+    # -----------------------------------------------------------------------
+    # 4. Fetch the pull request. Token present, no agent.
+    # -----------------------------------------------------------------------
+    - id: fetch
+      if: ${{ inputs.mode != 'reap' && steps.preflight.outputs.skip != 'true' && steps.config.outputs.code == '0' }}
+      shell: bash
+      env:
+        GITHUB_TOKEN: ${{ steps.token_open.outputs.token }}
+        PYTHONPATH: ${{ steps.paths.outputs.core }}
+        REPO: ${{ github.repository }}
+        PR_NUMBER: ${{ steps.preflight.outputs.pr_number }}
+        PREFETCH_DIR: ${{ steps.paths.outputs.prfetch }}
+      run: |
+        set -uo pipefail
+        python3 -m aireview fetch \
+          --repo "${REPO}" \
+          --pr "${PR_NUMBER}" \
+          --out "${PREFETCH_DIR}"
+        code=$?
+        echo "code=${code}" >> "$GITHUB_OUTPUT"
+        echo "fetch exited ${code}"
+        exit 0
+
+    - name: Install Claude Code
+      if: ${{ inputs.mode != 'reap' && steps.preflight.outputs.skip != 'true' && steps.fetch.outputs.code == '0' }}
+      shell: bash
+      env:
+        CLAUDE_CODE_VERSION: ${{ inputs.claude_code_version }}
+      run: |
+        set -euo pipefail
+        npm install -g "@anthropic-ai/claude-code@${CLAUDE_CODE_VERSION}"
+        claude --version || true
+
+    # -----------------------------------------------------------------------
+    # 5. THE AGENT STEP.
+    #
+    #    Its `env:` block is the security boundary, and it is deliberately
+    #    three lines long. No GITHUB_TOKEN, no app id, no private key -- not
+    #    "set but ignored by core", but absent from the process environment.
+    #    ANTHROPIC_API_KEY is unavoidable: `claude --bare` does not read
+    #    subscription login or the keychain.
+    #
+    #    Composite steps do not support `timeout-minutes`, so the wall clock is
+    #    enforced with coreutils `timeout`. Exit 124 means it fired; 137 means
+    #    the follow-up KILL did.
+    # -----------------------------------------------------------------------
+    - id: review
+      if: ${{ inputs.mode != 'reap' && steps.preflight.outputs.skip != 'true' && steps.fetch.outputs.code == '0' }}
+      shell: bash
+      env:
+        ANTHROPIC_API_KEY: ${{ inputs.anthropic_api_key }}
+        PYTHONPATH: ${{ steps.paths.outputs.core }}
+        JOB_TIMEOUT: ${{ inputs.job_timeout_seconds }}
+        PREFETCH_DIR: ${{ steps.paths.outputs.prfetch }}
+        CONFIG_FILE: ${{ steps.paths.outputs.config }}
+        RUN_RECORD: ${{ steps.paths.outputs.run_record }}
+        CHECKOUT_DIR: ${{ steps.preflight.outputs.checkout_dir }}
+      run: |
+        set -uo pipefail
+        # --allowed-paths is the changed-file list straight from the API. It is
+        # the allowlist the output validator checks every finding's path
+        # against, so it has to come from `fetch`, never from agent output.
+        timeout --signal=TERM --kill-after=30s "${JOB_TIMEOUT}s" \
+          python3 -m aireview review \
+            --prfetch "${PREFETCH_DIR}/prfetch.json" \
+            --allowed-paths "${PREFETCH_DIR}/allowed_paths.json" \
+            --config "${CONFIG_FILE}" \
+            --workspace "${CHECKOUT_DIR}" \
+            --out "${RUN_RECORD}"
+        code=$?
+        echo "code=${code}" >> "$GITHUB_OUTPUT"
+        echo "review exited ${code}"
+        exit 0
+
+    # -----------------------------------------------------------------------
+    # 6. Mint token #2, immediately before posting.
+    #
+    #    Installation tokens expire after an hour. A long review that reused
+    #    the token minted at job start would post with a dead one, which looks
+    #    from the outside like a silently dropped review.
+    # -----------------------------------------------------------------------
+    - id: token_post
+      if: ${{ always() && inputs.mode != 'reap' && steps.preflight.outputs.skip != 'true' }}
+      uses: actions/create-github-app-token@v2
+      with:
+        app-id: ${{ inputs.app_id }}
+        private-key: ${{ inputs.app_private_key }}
+        permission-contents: read
+        permission-checks: write
+        permission-pull-requests: write
+
+    - id: post
+      if: ${{ always() && inputs.mode != 'reap' && steps.preflight.outputs.skip != 'true' && steps.review.outputs.code == '0' }}
+      shell: bash
+      env:
+        GITHUB_TOKEN: ${{ steps.token_post.outputs.token }}
+        PYTHONPATH: ${{ steps.paths.outputs.core }}
+        RUN_RECORD: ${{ steps.paths.outputs.run_record }}
+        DRY_RUN: ${{ inputs.dry_run }}
+      run: |
+        set -uo pipefail
+        if [ "${DRY_RUN}" = "true" ]; then
+          python3 -m aireview post --run-record "${RUN_RECORD}" --dry-run
+        else
+          python3 -m aireview post --run-record "${RUN_RECORD}"
+        fi
+        code=$?
+        echo "code=${code}" >> "$GITHUB_OUTPUT"
+        echo "post exited ${code}"
+        exit 0
+
+    # -----------------------------------------------------------------------
+    # 7. Work out what actually happened, in one place, so the conclusion
+    #    mapping has exactly one input to reason about.
+    # -----------------------------------------------------------------------
+    - id: outcome
+      if: ${{ always() && inputs.mode != 'reap' }}
+      shell: bash
+      env:
+        SKIP: ${{ steps.preflight.outputs.skip }}
+        SKIP_OUTCOME: ${{ steps.preflight.outputs.skip_outcome }}
+        CANCELLED: ${{ steps.cancel_probe.outputs.cancelled }}
+        CONFIG_CODE: ${{ steps.config.outputs.code }}
+        FETCH_CODE: ${{ steps.fetch.outputs.code }}
+        REVIEW_CODE: ${{ steps.review.outputs.code }}
+        POST_CODE: ${{ steps.post.outputs.code }}
+      run: |
+        set -uo pipefail
+        detail=""
+
+        if [ "${SKIP}" = "true" ]; then
+          value="${SKIP_OUTCOME:-skipped_disabled}"
+        elif [ "${CANCELLED:-}" = "true" ]; then
+          # Routine, not exceptional: cancel-in-progress supersedes a stale run
+          # on every push. Must never conclude `cancelled`, which would block.
+          value="cancelled"
+        elif [ -z "${CONFIG_CODE:-}" ] || [ "${CONFIG_CODE}" != "0" ]; then
+          value="infra_error"; detail="the review config could not be resolved"
+        elif [ -z "${FETCH_CODE:-}" ]; then
+          value="infra_error"; detail="the job failed before the pull request could be fetched"
+        elif [ "${FETCH_CODE}" = "1" ]; then
+          value="policy_refusal"; detail="core declined at fetch (exit 1)"
+        elif [ "${FETCH_CODE}" != "0" ]; then
+          value="agent_failed"; detail="fetch failed with exit ${FETCH_CODE}"
+        elif [ -z "${REVIEW_CODE:-}" ]; then
+          value="infra_error"; detail="the review step did not run"
+        elif [ "${REVIEW_CODE}" = "124" ] || [ "${REVIEW_CODE}" = "137" ]; then
+          value="timed_out"; detail="the reviewer exceeded its time budget"
+        elif [ "${REVIEW_CODE}" = "1" ]; then
+          value="policy_refusal"; detail="core declined to review (exit 1)"
+        elif [ "${REVIEW_CODE}" != "0" ]; then
+          value="agent_failed"; detail="review failed with exit ${REVIEW_CODE}"
+        elif [ "${POST_CODE:-0}" = "2" ]; then
+          value="agent_failed"; detail="the run record was refused at the post boundary (exit 2)"
+        elif [ "${POST_CODE:-0}" = "1" ]; then
+          # core re-read the live head before posting and found it had moved.
+          # The findings were computed against a SHA that no longer exists on
+          # the branch, so they are stale; the newer run carries the review.
+          value="cancelled"; detail="the head moved between review and post; superseded"
+        else
+          value="ok"
+        fi
+
+        {
+          echo "value=${value}"
+          echo "detail=${detail}"
+        } >> "$GITHUB_OUTPUT"
+        echo "outcome=${value} ${detail}"
+
+    # -----------------------------------------------------------------------
+    # 8. ALWAYS finish the check run.
+    #
+    #    `always()` runs this step even when the job is cancelled, which is the
+    #    documented behaviour and the case that actually matters here:
+    #    cancel-in-progress cancels a superseded run on every push. A check run
+    #    left `in_progress` makes every open pull request unmergeable, which is
+    #    far worse than a missing review.
+    #
+    #    The conclusion is never `cancelled` or `timed_out`. Both block a
+    #    required check, and both are states this system causes on purpose.
+    # -----------------------------------------------------------------------
+    - id: finalize
+      if: ${{ always() && inputs.mode != 'reap' && steps.preflight.outputs.skip != 'true' }}
+      shell: bash
+      env:
+        GITHUB_TOKEN: ${{ steps.token_post.outputs.token }}
+        SCRIPTS: ${{ steps.paths.outputs.scripts }}
+        REPO: ${{ github.repository }}
+        CHECK_RUN_ID: ${{ steps.open_check.outputs.check_run_id }}
+        CHECK_NAME: ${{ inputs.check_name }}
+        HEAD_SHA: ${{ steps.preflight.outputs.head_sha }}
+        OUTCOME: ${{ steps.outcome.outputs.value }}
+        FAILURE_DETAIL: ${{ steps.outcome.outputs.detail }}
+        RUN_RECORD: ${{ steps.paths.outputs.run_record }}
+        NOTES: ${{ steps.paths.outputs.notes }}
+        BLOCKING: ${{ inputs.blocking }}
+        DRY_RUN: ${{ inputs.dry_run }}
+        RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+      run: |
+        set -uo pipefail
+        python3 "${SCRIPTS}/check_run.py" complete \
+          --repo "${REPO}" \
+          --check-run-id "${CHECK_RUN_ID}" \
+          --name "${CHECK_NAME}" \
+          --sha "${HEAD_SHA}" \
+          --outcome "${OUTCOME}" \
+          --run-record "${RUN_RECORD}" \
+          --notes "${NOTES}" \
+          --blocking "${BLOCKING}" \
+          --dry-run "${DRY_RUN}" \
+          --run-url "${RUN_URL}" \
+          --failure-detail "${FAILURE_DETAIL}"
+        code=$?
+        if [ "${code}" != "0" ]; then
+          echo "::error::The check run could not be completed for ${HEAD_SHA}. Run the reaper workflow against this SHA."
+        fi
+        exit 0
+
+    # -----------------------------------------------------------------------
+    # 9. A skipped pull request still needs the gate satisfied. If the check
+    #    never appears at all, a repo that marked it required is wedged for a
+    #    different reason. Post an already-completed `skipped` run.
+    # -----------------------------------------------------------------------
+    - id: finalize_skipped
+      if: ${{ always() && inputs.mode != 'reap' && steps.preflight.outputs.skip == 'true' }}
+      shell: bash
+      env:
+        # Deliberately the workflow token, not an App token: on a fork pull
+        # request no App token can be minted, and for the other skips this is a
+        # single status write. Where the token is read-only (the fork case) the
+        # write simply fails, which is why forks are documented as "skipped"
+        # rather than "gated".
+        GITHUB_TOKEN: ${{ github.token }}
+        SCRIPTS: ${{ steps.paths.outputs.scripts }}
+        REPO: ${{ github.repository }}
+        CHECK_NAME: ${{ inputs.check_name }}
+        HEAD_SHA: ${{ steps.preflight.outputs.head_sha }}
+        SKIP_OUTCOME: ${{ steps.preflight.outputs.skip_outcome }}
+        BLOCKING: ${{ inputs.blocking }}
+        DRY_RUN: ${{ inputs.dry_run }}
+        RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+      run: |
+        set -uo pipefail
+        if [ -n "${SKIP_OUTCOME:-}" ] && [ -n "${HEAD_SHA:-}" ]; then
+          python3 "${SCRIPTS}/check_run.py" complete \
+            --repo "${REPO}" \
+            --name "${CHECK_NAME}" \
+            --sha "${HEAD_SHA}" \
+            --outcome "${SKIP_OUTCOME}" \
+            --blocking "${BLOCKING}" \
+            --dry-run "${DRY_RUN}" \
+            --run-url "${RUN_URL}" ||
+            echo "::notice::Could not post the skipped check run; expected for fork pull requests."
+        fi
+        {
+          echo "### AI Review skipped"
+          echo ""
+          echo "Reason: \`${SKIP_OUTCOME:-unknown}\`"
+        } >> "$GITHUB_STEP_SUMMARY"
+        exit 0
+
+    # -----------------------------------------------------------------------
+    # 10. Reap mode. Used by the `closed` trigger and the scheduled sweeper, so
+    #     a pull request merged or abandoned mid-review leaves nothing pending.
+    # -----------------------------------------------------------------------
+    - id: token_reap
+      if: ${{ inputs.mode == 'reap' }}
+      uses: actions/create-github-app-token@v2
+      with:
+        app-id: ${{ inputs.app_id }}
+        private-key: ${{ inputs.app_private_key }}
+        permission-checks: write
+
+    - id: reap
+      if: ${{ inputs.mode == 'reap' }}
+      shell: bash
+      env:
+        GITHUB_TOKEN: ${{ steps.token_reap.outputs.token }}
+        SCRIPTS: ${{ steps.paths.outputs.scripts }}
+        REPO: ${{ github.repository }}
+        CHECK_NAME: ${{ inputs.check_name }}
+        HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+      run: |
+        set -uo pipefail
+        if [ -z "${HEAD_SHA:-}" ]; then
+          echo "::notice::No head SHA on this event; nothing to reap."
+          exit 0
+        fi
+        python3 "${SCRIPTS}/check_run.py" reap \
+          --repo "${REPO}" \
+          --sha "${HEAD_SHA}" \
+          --name "${CHECK_NAME}" \
+          --conclusion neutral \
+          --title "Review ended - pull request closed" \
+          --summary "The pull request was closed while the review was still running. The check was closed as neutral so it cannot block anything."
+        exit 0
