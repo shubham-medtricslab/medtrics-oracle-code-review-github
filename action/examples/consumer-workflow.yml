@@ -1,0 +1,46 @@
+# Copy this to `.github/workflows/ai-review.yml` in the repo you want reviewed.
+#
+# Everything below the `jobs:` key is the ten lines promised in the README. The
+# bulk of this file is the trigger and concurrency configuration, which is
+# where the interesting decisions live, so each one is explained.
+
+name: AI Review
+
+on:
+  pull_request:
+    # Enumerate the actions. The default set for `pull_request` is
+    # opened/reopened/synchronize, which silently omits `ready_for_review` --
+    # so a draft marked ready would never get reviewed -- and omits `closed`,
+    # which is how a dangling check run gets cleaned up.
+    types:
+      - opened            # first review
+      - reopened          # the branch is live again; re-review
+      - ready_for_review  # draft -> ready is the moment review becomes useful
+      - synchronize       # new commits pushed
+      - closed            # close out any check run still in flight
+
+# Debouncing, in one block, using the platform rather than hand-built state.
+#
+# A ten-push branch should cost one review, not ten. `cancel-in-progress` also
+# resolves the in-flight-supersede problem: a push that lands mid-review
+# cancels the stale run instead of letting it post findings against a SHA that
+# has already moved. The reviewer's `always()` finalizer closes the cancelled
+# run's check as `neutral`, never `cancelled`, so superseding never blocks a
+# merge.
+concurrency:
+  group: ai-review-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  review:
+    uses: medtrics/ai-code-review/.github/workflows/ai-review.yml@v1
+    with:
+      app_id: ${{ vars.AI_REVIEW_APP_ID }}
+      # Start here. Read a few runs, then turn dry_run off deliberately.
+      dry_run: true
+      # Leave blocking off until the signal has earned it. With it off the
+      # check is always `neutral` and cannot prevent a merge.
+      blocking: false
+    secrets:
+      app_private_key: ${{ secrets.AI_REVIEW_APP_PRIVATE_KEY }}
+      anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
