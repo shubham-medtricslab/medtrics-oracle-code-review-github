@@ -127,7 +127,7 @@ class FixtureContractTest(unittest.TestCase):
         self.assertTrue(validate(bad_enum, self.schema))
 
         extra_key = json.loads(json.dumps(record))
-        extra_key["findings"][0]["detector_key"] = "dl-009-select-star"
+        extra_key["findings"][0]["not_a_contract_key"] = "x"
         self.assertTrue(
             validate(extra_key, self.schema),
             "findings are additionalProperties: false, so an unknown key must fail",
@@ -140,6 +140,28 @@ class FixtureContractTest(unittest.TestCase):
         bad_sha = json.loads(json.dumps(record))
         bad_sha["head_sha"] = "not-a-sha"
         self.assertTrue(validate(bad_sha, self.schema))
+
+    def test_detector_key_is_contractual(self):
+        """`detector_key` was the canary in the unknown-key check above.
+
+        It was originally absent from the schema while findings carried it,
+        which meant a conforming record could not include it. The canary caught
+        that; the schema was amended, the canary moved to a genuinely unknown
+        key, and this asserts the resolution so the gap cannot silently return.
+
+        It matters because two detectors legitimately emit one principle id at
+        different severities - the FA-009 case - and `detector_key` is what
+        keeps them apart in the dedup anchor.
+        """
+        with open(os.path.join(FIXTURES, "run-record.complete.json"), encoding="utf-8") as fh:
+            record = json.load(fh)
+        record["findings"][0]["detector_key"] = "fa-009-deep-domain-import"
+        self.assertEqual(validate(record, self.schema), [])
+        record["findings"][0]["detector_key"] = None
+        self.assertEqual(
+            validate(record, self.schema), [],
+            "null is valid: a reviewer can raise a finding with no detector",
+        )
 
     def test_fixture_rule_ids_match_the_golden_rubric(self):
         # The fixtures carry real principle ids, so the renderer is exercised
