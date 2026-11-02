@@ -16,6 +16,25 @@ import sys
 ALLOWED_LOCAL_ROOTS = {"aireview"}
 
 
+def _is_sibling_module(name, importing_file):
+    """True when `name` resolves to a plain file next to the importer.
+
+    Shared test helpers are local code, not dependencies. The gate exists to
+    stop a third-party package creeping into `packages/core`, and a
+    third-party package is never a `.py` file sitting in the importing
+    directory - so skipping these catches no fewer real violations.
+
+    Needed once tests started sharing helpers, which happened as soon as one
+    set of assertions had to run against two implementations (the frozen
+    v0.5.0 reference and the new one).
+    """
+    directory = os.path.dirname(os.path.abspath(importing_file))
+    return (
+        os.path.isfile(os.path.join(directory, name + ".py"))
+        or os.path.isfile(os.path.join(directory, name, "__init__.py"))
+    )
+
+
 def top_level_imports(path):
     with open(path, encoding="utf-8") as fh:
         try:
@@ -56,6 +75,8 @@ def main(argv=None):
             checked += 1
             for m in sorted(mods):
                 if m in stdlib or m in ALLOWED_LOCAL_ROOTS:
+                    continue
+                if _is_sibling_module(m, p):
                     continue
                 violations.append((p, m))
 
