@@ -1,0 +1,501 @@
+{
+  "id": "supabase-rls",
+  "version": "1.0.0",
+  "description": "Supabase, SQL, Postgres RLS and edge-function rules. Owns all 16 rules on the `rls` reviewer surface.",
+  "requires": [
+    "base"
+  ],
+  "rules": [
+    {
+      "id": "TS-007",
+      "category": "typescript-standards",
+      "title": "Auto-Generated Types (never hand-edit types.ts)",
+      "enforcement": "established",
+      "detect": "Apply catalog rule TS-007 (\"Auto-Generated Types (never hand-edit types.ts)\") to the changed hunks; cite file and line for every finding."
+    },
+    {
+      "id": "TS-008",
+      "category": "typescript-standards",
+      "title": "Phantom Column Rule",
+      "enforcement": "established",
+      "severity": "critical",
+      "detect": "Apply catalog rule TS-008 (\"Phantom Column Rule\") to the changed hunks; cite file and line for every finding."
+    },
+    {
+      "id": "TS-011",
+      "category": "typescript-standards",
+      "title": "Hand-Written Types (verify column-by-column)",
+      "enforcement": "established",
+      "detect": "Apply catalog rule TS-011 (\"Hand-Written Types (verify column-by-column)\") to the changed hunks; cite file and line for every finding."
+    },
+    {
+      "id": "TS-012",
+      "category": "typescript-standards",
+      "title": "Status Enum Cross-Reference",
+      "enforcement": "established",
+      "severity": "critical",
+      "detect": "Apply catalog rule TS-012 (\"Status Enum Cross-Reference\") to the changed hunks; cite file and line for every finding."
+    },
+    {
+      "id": "DL-001",
+      "category": "supabase-data-layer",
+      "title": "Row Level Security on every table — no exceptions",
+      "enforcement": "established",
+      "severity": "high",
+      "surface": "rls",
+      "detect": "Apply catalog rule DL-001 (\"Row Level Security on every table — no exceptions\") to the changed hunks; cite file and line for every finding."
+    },
+    {
+      "id": "DL-002",
+      "category": "supabase-data-layer",
+      "title": "Database functions for complex logic — business rules server-side",
+      "enforcement": "established",
+      "detect": "Apply catalog rule DL-002 (\"Database functions for complex logic — business rules server-side\") to the changed hunks; cite file and line for every finding."
+    },
+    {
+      "id": "DL-003",
+      "category": "supabase-data-layer",
+      "title": "Typed client with generated types from Supabase CLI",
+      "enforcement": "established",
+      "severity": "high",
+      "detect": "Apply catalog rule DL-003 (\"Typed client with generated types from Supabase CLI\") to the changed hunks; cite file and line for every finding."
+    },
+    {
+      "id": "DL-004",
+      "category": "supabase-data-layer",
+      "title": "Migrations tracked in version control, never manual schema changes",
+      "enforcement": "established",
+      "detect": "Apply catalog rule DL-004 (\"Migrations tracked in version control, never manual schema changes\") to the changed hunks; cite file and line for every finding."
+    },
+    {
+      "id": "DL-005",
+      "category": "supabase-data-layer",
+      "title": "Separate service role usage from client role — never expose service key",
+      "enforcement": "established",
+      "severity": "high",
+      "surface": "security_privacy",
+      "detect": "Apply catalog rule DL-005 (\"Separate service role usage from client role — never expose service key\") to the changed hunks; cite file and line for every finding."
+    },
+    {
+      "id": "DL-006",
+      "category": "supabase-data-layer",
+      "title": "Schema Conventions (snake_case, required columns, FK naming)",
+      "enforcement": "established",
+      "detect": "Apply catalog rule DL-006 (\"Schema Conventions (snake_case, required columns, FK naming)\") to the changed hunks; cite file and line for every finding."
+    },
+    {
+      "id": "DL-007",
+      "category": "supabase-data-layer",
+      "title": "Index Strategy",
+      "enforcement": "established",
+      "detect": "Apply catalog rule DL-007 (\"Index Strategy\") to the changed hunks; cite file and line for every finding."
+    },
+    {
+      "id": "DL-008",
+      "category": "supabase-data-layer",
+      "title": "View Standards (security_invoker = true)",
+      "enforcement": "established",
+      "severity": "critical",
+      "detect": "Apply catalog rule DL-008 (\"View Standards (security_invoker = true)\") to the changed hunks; cite file and line for every finding."
+    },
+    {
+      "id": "DL-009",
+      "category": "supabase-data-layer",
+      "title": "Query Optimization (no DB calls in loops)",
+      "enforcement": "established",
+      "detect": "Apply catalog rule DL-009 (\"Query Optimization (no DB calls in loops)\") to the changed hunks; cite file and line for every finding."
+    },
+    {
+      "id": "DL-010",
+      "category": "supabase-data-layer",
+      "title": "Query Key Factory",
+      "enforcement": "established",
+      "detect": "Apply catalog rule DL-010 (\"Query Key Factory\") to the changed hunks; cite file and line for every finding."
+    },
+    {
+      "id": "DL-012",
+      "category": "supabase-data-layer",
+      "title": "Documentation Requirements (COMMENT ON ...)",
+      "enforcement": "established",
+      "detect": "Apply catalog rule DL-012 (\"Documentation Requirements (COMMENT ON ...)\") to the changed hunks; cite file and line for every finding."
+    },
+    {
+      "id": "DL-013",
+      "category": "supabase-data-layer",
+      "title": "Service Scoping (institution_id / program_id)",
+      "enforcement": "established",
+      "severity": "high",
+      "surface": "rls",
+      "detect": "Apply catalog rule DL-013 (\"Service Scoping (institution_id / program_id)\") to the changed hunks; cite file and line for every finding."
+    },
+    {
+      "id": "DL-014",
+      "category": "supabase-data-layer",
+      "title": "Soft-Delete Enforcement (.is('deleted_at', null))",
+      "enforcement": "established",
+      "severity": "high",
+      "surface": "rls",
+      "detect": "Apply catalog rule DL-014 (\"Soft-Delete Enforcement (.is('deleted_at', null))\") to the changed hunks; cite file and line for every finding."
+    },
+    {
+      "id": "DL-015",
+      "category": "supabase-data-layer",
+      "title": "RLS Performance Rules",
+      "enforcement": "established",
+      "severity": "high",
+      "surface": "rls",
+      "detect": "Apply catalog rule DL-015 (\"RLS Performance Rules\") to the changed hunks; cite file and line for every finding."
+    },
+    {
+      "id": "DL-016",
+      "category": "supabase-data-layer",
+      "title": "RLS Completeness Requirements",
+      "enforcement": "established",
+      "severity": "high",
+      "surface": "rls",
+      "detect": "Apply catalog rule DL-016 (\"RLS Completeness Requirements\") to the changed hunks; cite file and line for every finding."
+    },
+    {
+      "id": "DL-017",
+      "category": "supabase-data-layer",
+      "title": "Silent Error Prevention (throw on Supabase errors)",
+      "enforcement": "established",
+      "detect": "Apply catalog rule DL-017 (\"Silent Error Prevention (throw on Supabase errors)\") to the changed hunks; cite file and line for every finding."
+    },
+    {
+      "id": "DL-018",
+      "category": "supabase-data-layer",
+      "title": "Migration Hygiene",
+      "enforcement": "established",
+      "detect": "Apply catalog rule DL-018 (\"Migration Hygiene\") to the changed hunks; cite file and line for every finding."
+    },
+    {
+      "id": "DL-021",
+      "category": "supabase-data-layer",
+      "title": "ON DELETE Documentation (no CASCADE on HIPAA tables)",
+      "enforcement": "established",
+      "severity": "critical",
+      "detect": "Apply catalog rule DL-021 (\"ON DELETE Documentation (no CASCADE on HIPAA tables)\") to the changed hunks; cite file and line for every finding."
+    },
+    {
+      "id": "DL-028",
+      "category": "supabase-data-layer",
+      "title": "Materialized View Considerations (RLS on read)",
+      "enforcement": "established",
+      "severity": "high",
+      "surface": "rls",
+      "detect": "Apply catalog rule DL-028 (\"Materialized View Considerations (RLS on read)\") to the changed hunks; cite file and line for every finding."
+    },
+    {
+      "id": "DL-029",
+      "category": "supabase-data-layer",
+      "title": "Realtime Subscription Security",
+      "enforcement": "established",
+      "severity": "high",
+      "surface": "rls",
+      "detect": "Apply catalog rule DL-029 (\"Realtime Subscription Security\") to the changed hunks; cite file and line for every finding."
+    },
+    {
+      "id": "DL-030",
+      "category": "supabase-data-layer",
+      "title": "FOR ALL Policy Risks",
+      "enforcement": "established",
+      "severity": "high",
+      "surface": "rls",
+      "detect": "Apply catalog rule DL-030 (\"FOR ALL Policy Risks\") to the changed hunks; cite file and line for every finding."
+    },
+    {
+      "id": "DL-031",
+      "category": "supabase-data-layer",
+      "title": "Service Role Policy Confusion",
+      "enforcement": "established",
+      "severity": "medium",
+      "surface": "rls",
+      "detect": "Apply catalog rule DL-031 (\"Service Role Policy Confusion\") to the changed hunks; cite file and line for every finding."
+    },
+    {
+      "id": "DL-032",
+      "category": "supabase-data-layer",
+      "title": "Query Pagination & Batching",
+      "enforcement": "established",
+      "detect": "Apply catalog rule DL-032 (\"Query Pagination & Batching\") to the changed hunks; cite file and line for every finding."
+    },
+    {
+      "id": "SEC-001",
+      "category": "authentication-security",
+      "title": "Roles in a dedicated user_roles table — never on profiles",
+      "enforcement": "established",
+      "severity": "high",
+      "surface": "rls",
+      "detect": "Apply catalog rule SEC-001 (\"Roles in a dedicated user_roles table — never on profiles\") to the changed hunks; cite file and line for every finding."
+    },
+    {
+      "id": "SEC-002",
+      "category": "authentication-security",
+      "title": "Server-side role checks via security definer functions",
+      "enforcement": "established",
+      "severity": "high",
+      "surface": "rls",
+      "detect": "Apply catalog rule SEC-002 (\"Server-side role checks via security definer functions\") to the changed hunks; cite file and line for every finding."
+    },
+    {
+      "id": "SEC-006",
+      "category": "authentication-security",
+      "title": "Edge Function Auth Levels",
+      "enforcement": "established",
+      "surface": "edge_function",
+      "detect": "Apply catalog rule SEC-006 (\"Edge Function Auth Levels\") to the changed hunks; cite file and line for every finding."
+    },
+    {
+      "id": "SEC-013",
+      "category": "authentication-security",
+      "title": "Storage Bucket Security",
+      "enforcement": "established",
+      "severity": "high",
+      "detect": "Apply catalog rule SEC-013 (\"Storage Bucket Security\") to the changed hunks; cite file and line for every finding."
+    },
+    {
+      "id": "SEC-014",
+      "category": "authentication-security",
+      "title": "Default-Deny Violations (never return true)",
+      "enforcement": "established",
+      "severity": "critical",
+      "surface": "rls",
+      "detect": "Apply catalog rule SEC-014 (\"Default-Deny Violations (never return true)\") to the changed hunks; cite file and line for every finding."
+    },
+    {
+      "id": "SEC-015",
+      "category": "authentication-security",
+      "title": "Wrong Entity Scoping (swapped scope IDs)",
+      "enforcement": "established",
+      "severity": "high",
+      "surface": "rls",
+      "detect": "Apply catalog rule SEC-015 (\"Wrong Entity Scoping (swapped scope IDs)\") to the changed hunks; cite file and line for every finding."
+    },
+    {
+      "id": "SEC-018",
+      "category": "authentication-security",
+      "title": "SECURITY DEFINER Parameter Validation",
+      "enforcement": "established",
+      "severity": "high",
+      "surface": "rls",
+      "detect": "Apply catalog rule SEC-018 (\"SECURITY DEFINER Parameter Validation\") to the changed hunks; cite file and line for every finding."
+    },
+    {
+      "id": "SEC-019",
+      "category": "authentication-security",
+      "title": "PostgREST Exposure (Extended)",
+      "enforcement": "established",
+      "severity": "high",
+      "surface": "rls",
+      "detect": "Apply catalog rule SEC-019 (\"PostgREST Exposure (Extended)\") to the changed hunks; cite file and line for every finding."
+    },
+    {
+      "id": "SEC-020",
+      "category": "authentication-security",
+      "title": "BYPASSRLS Privilege Risks",
+      "enforcement": "established",
+      "severity": "high",
+      "surface": "rls",
+      "detect": "Apply catalog rule SEC-020 (\"BYPASSRLS Privilege Risks\") to the changed hunks; cite file and line for every finding."
+    },
+    {
+      "id": "EF-001",
+      "category": "edge-functions-apis",
+      "title": "One function per concern — avoid monolithic edge functions",
+      "enforcement": "established",
+      "detect": "Apply catalog rule EF-001 (\"One function per concern — avoid monolithic edge functions\") to the changed hunks; cite file and line for every finding."
+    },
+    {
+      "id": "EF-002",
+      "category": "edge-functions-apis",
+      "title": "Input validation at the boundary with Zod schemas",
+      "enforcement": "established",
+      "detect": "Apply catalog rule EF-002 (\"Input validation at the boundary with Zod schemas\") to the changed hunks; cite file and line for every finding."
+    },
+    {
+      "id": "EF-003",
+      "category": "edge-functions-apis",
+      "title": "Proper error handling: typed errors, no swallowed exceptions",
+      "enforcement": "established",
+      "detect": "Apply catalog rule EF-003 (\"Proper error handling: typed errors, no swallowed exceptions\") to the changed hunks; cite file and line for every finding."
+    },
+    {
+      "id": "EF-004",
+      "category": "edge-functions-apis",
+      "title": "Idempotent operations where possible (payments, emails)",
+      "enforcement": "missing",
+      "detect": "Apply catalog rule EF-004 (\"Idempotent operations where possible (payments, emails)\") to the changed hunks; cite file and line for every finding."
+    },
+    {
+      "id": "EF-005",
+      "category": "edge-functions-apis",
+      "title": "Structured logging with correlation IDs for tracing",
+      "enforcement": "established",
+      "detect": "Apply catalog rule EF-005 (\"Structured logging with correlation IDs for tracing\") to the changed hunks; cite file and line for every finding."
+    },
+    {
+      "id": "EF-009",
+      "category": "edge-functions-apis",
+      "title": "Anti-Patterns",
+      "enforcement": "established",
+      "detect": "Apply catalog rule EF-009 (\"Anti-Patterns\") to the changed hunks; cite file and line for every finding."
+    },
+    {
+      "id": "EF-010",
+      "category": "edge-functions-apis",
+      "title": "N+1 Prevention",
+      "enforcement": "established",
+      "detect": "Apply catalog rule EF-010 (\"N+1 Prevention\") to the changed hunks; cite file and line for every finding."
+    },
+    {
+      "id": "EF-011",
+      "category": "edge-functions-apis",
+      "title": "Cron Functions (idempotent, pg_cron)",
+      "enforcement": "established",
+      "detect": "Apply catalog rule EF-011 (\"Cron Functions (idempotent, pg_cron)\") to the changed hunks; cite file and line for every finding."
+    },
+    {
+      "id": "EF-012",
+      "category": "edge-functions-apis",
+      "title": "Module-Scope State Ban",
+      "enforcement": "established",
+      "detect": "Apply catalog rule EF-012 (\"Module-Scope State Ban\") to the changed hunks; cite file and line for every finding."
+    },
+    {
+      "id": "EF-013",
+      "category": "edge-functions-apis",
+      "title": "Partial Failure Handling",
+      "enforcement": "partial",
+      "detect": "Apply catalog rule EF-013 (\"Partial Failure Handling\") to the changed hunks; cite file and line for every finding."
+    },
+    {
+      "id": "EF-014",
+      "category": "edge-functions-apis",
+      "title": "Frontend Integration Pattern",
+      "enforcement": "established",
+      "detect": "Apply catalog rule EF-014 (\"Frontend Integration Pattern\") to the changed hunks; cite file and line for every finding."
+    },
+    {
+      "id": "EF-016",
+      "category": "edge-functions-apis",
+      "title": "Timeout Guards",
+      "enforcement": "established",
+      "detect": "Apply catalog rule EF-016 (\"Timeout Guards\") to the changed hunks; cite file and line for every finding."
+    },
+    {
+      "id": "EF-017",
+      "category": "edge-functions-apis",
+      "title": "No Multiple Supabase Client Instances",
+      "enforcement": "established",
+      "detect": "Apply catalog rule EF-017 (\"No Multiple Supabase Client Instances\") to the changed hunks; cite file and line for every finding."
+    },
+    {
+      "id": "EF-018",
+      "category": "edge-functions-apis",
+      "title": "Tenant Isolation with Service Role",
+      "enforcement": "established",
+      "severity": "high",
+      "detect": "Apply catalog rule EF-018 (\"Tenant Isolation with Service Role\") to the changed hunks; cite file and line for every finding."
+    },
+    {
+      "id": "IM-013",
+      "category": "incident-monitoring",
+      "title": "Memory Leaks in Edge Functions",
+      "enforcement": "established",
+      "detect": "Apply catalog rule IM-013 (\"Memory Leaks in Edge Functions\") to the changed hunks; cite file and line for every finding."
+    }
+  ],
+  "detectors": [
+    {
+      "key": "dl-009-select-star",
+      "emits_principle_id": "DL-009",
+      "severity": "medium",
+      "pattern": "\\.select\\(\\s*['\"]\\*['\"]\\s*\\)",
+      "message": "select('*') — enumerate columns; never select * on wide/JSONB tables (DL-009).",
+      "include_globs": [
+        "**/services/**/*.ts"
+      ]
+    },
+    {
+      "key": "dl-008-view-security-invoker",
+      "emits_principle_id": "DL-008",
+      "severity": "critical",
+      "pattern": "CREATE\\s+(OR\\s+REPLACE\\s+)?VIEW",
+      "message": "New/changed VIEW — confirm `security_invoker = true` or it bypasses RLS (DL-008).",
+      "flags": [
+        "IGNORECASE"
+      ],
+      "include_globs": [
+        "**/*.sql"
+      ]
+    },
+    {
+      "key": "dl-030-for-all-policy",
+      "emits_principle_id": "DL-030",
+      "severity": "high",
+      "pattern": "FOR\\s+ALL\\b",
+      "message": "FOR ALL policy grants SELECT+INSERT+UPDATE+DELETE with one condition — prefer per-op policies (DL-030).",
+      "flags": [
+        "IGNORECASE"
+      ],
+      "include_globs": [
+        "**/*.sql"
+      ]
+    },
+    {
+      "key": "dl-001-create-table-rls",
+      "emits_principle_id": "DL-001",
+      "severity": "high",
+      "pattern": "CREATE\\s+TABLE",
+      "message": "New table — confirm ENABLE ROW LEVEL SECURITY + policies for every used op (DL-001/DL-016).",
+      "flags": [
+        "IGNORECASE"
+      ],
+      "include_globs": [
+        "**/*.sql"
+      ]
+    },
+    {
+      "key": "sec-014-policy-returns-true",
+      "emits_principle_id": "SEC-014",
+      "severity": "critical",
+      "pattern": "\\breturn\\s+true\\b",
+      "message": "Permission/policy path returning true — verify this is not a default-allow (SEC-014).",
+      "flags": [
+        "IGNORECASE"
+      ],
+      "include_globs": [
+        "**/*.sql"
+      ]
+    },
+    {
+      "key": "dl-014-soft-delete-filter",
+      "emits_principle_id": "DL-014",
+      "severity": "high",
+      "pattern": "\\.update\\(|\\.delete\\(",
+      "message": "update/delete on a table — confirm soft-delete filter .is('deleted_at', null) where applicable (DL-014).",
+      "include_globs": [
+        "**/services/**/*.ts"
+      ]
+    }
+  ],
+  "surface_path_globs": {
+    "data_layer": [
+      "**/*.sql",
+      "**/services/**/*.ts",
+      "supabase/**"
+    ],
+    "rls": [
+      "**/*.sql",
+      "supabase/migrations/**"
+    ],
+    "edge_function": [
+      "supabase/functions/**",
+      "**/functions/**/*.ts"
+    ]
+  },
+  "severity_floors": {
+    "rls": "high"
+  }
+}

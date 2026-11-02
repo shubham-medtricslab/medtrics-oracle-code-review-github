@@ -1,0 +1,804 @@
+{
+  "id": "base",
+  "version": "1.0.0",
+  "description": "Stack-neutral review rules. Applies to any codebase. Declares the shared category table that every other pack contributes rules into.",
+  "categories": {
+    "frontend-architecture": {
+      "name": "Frontend Architecture",
+      "prefix": "FA",
+      "default_surface": "frontend",
+      "default_severity": "medium",
+      "default_diff_checkable": "checkout"
+    },
+    "typescript-standards": {
+      "name": "TypeScript Standards",
+      "prefix": "TS",
+      "default_surface": "typescript",
+      "default_severity": "medium",
+      "default_diff_checkable": "yes"
+    },
+    "supabase-data-layer": {
+      "name": "Supabase Data Layer",
+      "prefix": "DL",
+      "default_surface": "data_layer",
+      "default_severity": "medium",
+      "default_diff_checkable": "checkout"
+    },
+    "authentication-security": {
+      "name": "Authentication Security",
+      "prefix": "SEC",
+      "default_surface": "security_privacy",
+      "default_severity": "high",
+      "default_diff_checkable": "checkout"
+    },
+    "edge-functions-apis": {
+      "name": "Edge Functions & APIs",
+      "prefix": "EF",
+      "default_surface": "edge_function",
+      "default_severity": "medium",
+      "default_diff_checkable": "checkout"
+    },
+    "ux-accessibility": {
+      "name": "UX Accessibility",
+      "prefix": "UX",
+      "default_surface": "ux_a11y",
+      "default_severity": "low",
+      "default_diff_checkable": "checkout"
+    },
+    "performance": {
+      "name": "Performance",
+      "prefix": "PERF",
+      "default_surface": "risk",
+      "default_severity": "medium",
+      "default_diff_checkable": "checkout"
+    },
+    "testing-quality-gates": {
+      "name": "Testing & Quality Gates",
+      "prefix": "TEST",
+      "default_surface": "process",
+      "default_severity": "low",
+      "default_diff_checkable": "process"
+    },
+    "documentation-standards": {
+      "name": "Documentation Standards",
+      "prefix": "DOC",
+      "default_surface": "process",
+      "default_severity": "low",
+      "default_diff_checkable": "process"
+    },
+    "git-collaboration": {
+      "name": "Git Collaboration",
+      "prefix": "GIT",
+      "default_surface": "process",
+      "default_severity": "low",
+      "default_diff_checkable": "process"
+    },
+    "devops-infrastructure": {
+      "name": "DevOps Infrastructure",
+      "prefix": "OPS",
+      "default_surface": "process",
+      "default_severity": "low",
+      "default_diff_checkable": "process"
+    },
+    "ai-agent-management": {
+      "name": "AI Agent Management",
+      "prefix": "AI",
+      "default_surface": "process",
+      "default_severity": "low",
+      "default_diff_checkable": "process"
+    },
+    "incident-monitoring": {
+      "name": "Incident & Monitoring",
+      "prefix": "IM",
+      "default_surface": "security_privacy",
+      "default_severity": "medium",
+      "default_diff_checkable": "process"
+    },
+    "accessibility-wcag": {
+      "name": "Accessibility (WCAG)",
+      "prefix": "A11Y",
+      "default_surface": "ux_a11y",
+      "default_severity": "medium",
+      "default_diff_checkable": "checkout"
+    },
+    "mobile-best-practices": {
+      "name": "Mobile Best Practices",
+      "prefix": "MOB",
+      "default_surface": "ux_a11y",
+      "default_severity": "low",
+      "default_diff_checkable": "checkout"
+    },
+    "gdpr-data-privacy": {
+      "name": "GDPR & Data Privacy",
+      "prefix": "PRIV",
+      "default_surface": "security_privacy",
+      "default_severity": "high",
+      "default_diff_checkable": "checkout"
+    },
+    "internationalization": {
+      "name": "Internationalization",
+      "prefix": "I18N",
+      "default_surface": "i18n_rtl",
+      "default_severity": "low",
+      "default_diff_checkable": "yes"
+    }
+  },
+  "rules": [
+    {
+      "id": "SEC-003",
+      "category": "authentication-security",
+      "title": "Input validation at server boundaries (Zod, escapeHtml, UUID)",
+      "enforcement": "established",
+      "detect": "Apply catalog rule SEC-003 (\"Input validation at server boundaries (Zod, escapeHtml, UUID)\") to the changed hunks; cite file and line for every finding."
+    },
+    {
+      "id": "SEC-004",
+      "category": "authentication-security",
+      "title": "No secrets in code — use environment variables or secret managers",
+      "enforcement": "established",
+      "severity": "high",
+      "diff_checkable": "yes",
+      "detect": "Apply catalog rule SEC-004 (\"No secrets in code — use environment variables or secret managers\") to the changed hunks; cite file and line for every finding."
+    },
+    {
+      "id": "SEC-005",
+      "category": "authentication-security",
+      "title": "CORS, rate limiting, and abuse prevention on all public endpoints",
+      "enforcement": "missing",
+      "detect": "Apply catalog rule SEC-005 (\"CORS, rate limiting, and abuse prevention on all public endpoints\") to the changed hunks; cite file and line for every finding."
+    },
+    {
+      "id": "SEC-007",
+      "category": "authentication-security",
+      "title": "XSS Prevention (escapeHtml, no dangerouslySetInnerHTML)",
+      "enforcement": "established",
+      "severity": "high",
+      "detect": "Apply catalog rule SEC-007 (\"XSS Prevention (escapeHtml, no dangerouslySetInnerHTML)\") to the changed hunks; cite file and line for every finding."
+    },
+    {
+      "id": "SEC-011",
+      "category": "authentication-security",
+      "title": "Error Message Sanitization (Security)",
+      "enforcement": "established",
+      "detect": "Apply catalog rule SEC-011 (\"Error Message Sanitization (Security)\") to the changed hunks; cite file and line for every finding."
+    },
+    {
+      "id": "SEC-016",
+      "category": "authentication-security",
+      "title": "Missing Permission Gates",
+      "enforcement": "missing",
+      "detect": "Apply catalog rule SEC-016 (\"Missing Permission Gates\") to the changed hunks; cite file and line for every finding."
+    },
+    {
+      "id": "SEC-017",
+      "category": "authentication-security",
+      "title": "No Hardcoded Credentials",
+      "enforcement": "established",
+      "severity": "high",
+      "diff_checkable": "yes",
+      "detect": "Apply catalog rule SEC-017 (\"No Hardcoded Credentials\") to the changed hunks; cite file and line for every finding."
+    },
+    {
+      "id": "SEC-022",
+      "category": "authentication-security",
+      "title": "File Upload Validation",
+      "enforcement": "established",
+      "detect": "Apply catalog rule SEC-022 (\"File Upload Validation\") to the changed hunks; cite file and line for every finding."
+    },
+    {
+      "id": "UX-001",
+      "category": "ux-accessibility",
+      "title": "Semantic HTML: proper headings, landmarks, ARIA labels",
+      "enforcement": "established",
+      "detect": "Apply catalog rule UX-001 (\"Semantic HTML: proper headings, landmarks, ARIA labels\") to the changed hunks; cite file and line for every finding."
+    },
+    {
+      "id": "UX-002",
+      "category": "ux-accessibility",
+      "title": "Loading, empty, and error states for every async operation",
+      "enforcement": "established",
+      "detect": "Apply catalog rule UX-002 (\"Loading, empty, and error states for every async operation\") to the changed hunks; cite file and line for every finding."
+    },
+    {
+      "id": "UX-004",
+      "category": "ux-accessibility",
+      "title": "Mobile-first responsive design — test at 320px minimum",
+      "enforcement": "established",
+      "detect": "Apply catalog rule UX-004 (\"Mobile-first responsive design — test at 320px minimum\") to the changed hunks; cite file and line for every finding."
+    },
+    {
+      "id": "UX-005",
+      "category": "ux-accessibility",
+      "title": "Keyboard navigable: focus management, skip links, tab order",
+      "enforcement": "established",
+      "detect": "Apply catalog rule UX-005 (\"Keyboard navigable: focus management, skip links, tab order\") to the changed hunks; cite file and line for every finding."
+    },
+    {
+      "id": "UX-006",
+      "category": "ux-accessibility",
+      "title": "Visual Hierarchy Standards",
+      "enforcement": "established",
+      "detect": "Apply catalog rule UX-006 (\"Visual Hierarchy Standards\") to the changed hunks; cite file and line for every finding."
+    },
+    {
+      "id": "UX-007",
+      "category": "ux-accessibility",
+      "title": "Status Color Semantics",
+      "enforcement": "established",
+      "detect": "Apply catalog rule UX-007 (\"Status Color Semantics\") to the changed hunks; cite file and line for every finding."
+    },
+    {
+      "id": "UX-009",
+      "category": "ux-accessibility",
+      "title": "Feedback Consistency",
+      "enforcement": "established",
+      "detect": "Apply catalog rule UX-009 (\"Feedback Consistency\") to the changed hunks; cite file and line for every finding."
+    },
+    {
+      "id": "UX-010",
+      "category": "ux-accessibility",
+      "title": "Table Design",
+      "enforcement": "established",
+      "detect": "Apply catalog rule UX-010 (\"Table Design\") to the changed hunks; cite file and line for every finding."
+    },
+    {
+      "id": "UX-011",
+      "category": "ux-accessibility",
+      "title": "Visual Hierarchy Through Weight (Detailed)",
+      "enforcement": "established",
+      "detect": "Apply catalog rule UX-011 (\"Visual Hierarchy Through Weight (Detailed)\") to the changed hunks; cite file and line for every finding."
+    },
+    {
+      "id": "UX-012",
+      "category": "ux-accessibility",
+      "title": "Scannability Patterns",
+      "enforcement": "established",
+      "detect": "Apply catalog rule UX-012 (\"Scannability Patterns\") to the changed hunks; cite file and line for every finding."
+    },
+    {
+      "id": "UX-013",
+      "category": "ux-accessibility",
+      "title": "Enterprise Interaction States",
+      "enforcement": "established",
+      "detect": "Apply catalog rule UX-013 (\"Enterprise Interaction States\") to the changed hunks; cite file and line for every finding."
+    },
+    {
+      "id": "UX-014",
+      "category": "ux-accessibility",
+      "title": "Form Design Patterns",
+      "enforcement": "established",
+      "detect": "Apply catalog rule UX-014 (\"Form Design Patterns\") to the changed hunks; cite file and line for every finding."
+    },
+    {
+      "id": "UX-015",
+      "category": "ux-accessibility",
+      "title": "Navigation Patterns",
+      "enforcement": "established",
+      "detect": "Apply catalog rule UX-015 (\"Navigation Patterns\") to the changed hunks; cite file and line for every finding."
+    },
+    {
+      "id": "UX-017",
+      "category": "ux-accessibility",
+      "title": "UX Anti-Patterns",
+      "enforcement": "established",
+      "detect": "Apply catalog rule UX-017 (\"UX Anti-Patterns\") to the changed hunks; cite file and line for every finding."
+    },
+    {
+      "id": "UX-024",
+      "category": "ux-accessibility",
+      "title": "Error Sanitization (UX)",
+      "enforcement": "established",
+      "diff_checkable": "yes",
+      "detect": "Apply catalog rule UX-024 (\"Error Sanitization (UX)\") to the changed hunks; cite file and line for every finding."
+    },
+    {
+      "id": "UX-025",
+      "category": "ux-accessibility",
+      "title": "Design for 500-Row Case",
+      "enforcement": "established",
+      "detect": "Apply catalog rule UX-025 (\"Design for 500-Row Case\") to the changed hunks; cite file and line for every finding."
+    },
+    {
+      "id": "PERF-002",
+      "category": "performance",
+      "title": "Images: lazy loading, proper sizing, WebP/AVIF formats",
+      "enforcement": "established",
+      "detect": "Apply catalog rule PERF-002 (\"Images: lazy loading, proper sizing, WebP/AVIF formats\") to the changed hunks; cite file and line for every finding."
+    },
+    {
+      "id": "PERF-005",
+      "category": "performance",
+      "title": "Bundle analysis on every PR — no unexplained size increases",
+      "enforcement": "missing",
+      "detect": "Apply catalog rule PERF-005 (\"Bundle analysis on every PR — no unexplained size increases\") to the changed hunks; cite file and line for every finding."
+    },
+    {
+      "id": "PERF-011",
+      "category": "performance",
+      "title": "Success Metrics",
+      "enforcement": "established",
+      "diff_checkable": "process",
+      "detect": "Apply catalog rule PERF-011 (\"Success Metrics\") to the changed hunks; cite file and line for every finding."
+    },
+    {
+      "id": "PERF-014",
+      "category": "performance",
+      "title": "Search/Filter Performance",
+      "enforcement": "established",
+      "detect": "Apply catalog rule PERF-014 (\"Search/Filter Performance\") to the changed hunks; cite file and line for every finding."
+    },
+    {
+      "id": "PERF-017",
+      "category": "performance",
+      "title": "Startup Waterfall Optimization (Detailed)",
+      "enforcement": "established",
+      "detect": "Apply catalog rule PERF-017 (\"Startup Waterfall Optimization (Detailed)\") to the changed hunks; cite file and line for every finding."
+    },
+    {
+      "id": "PERF-018",
+      "category": "performance",
+      "title": "Bundle Specifics (Extended)",
+      "enforcement": "established",
+      "detect": "Apply catalog rule PERF-018 (\"Bundle Specifics (Extended)\") to the changed hunks; cite file and line for every finding."
+    },
+    {
+      "id": "PERF-019",
+      "category": "performance",
+      "title": "Service Worker / PWA",
+      "enforcement": "established",
+      "detect": "Apply catalog rule PERF-019 (\"Service Worker / PWA\") to the changed hunks; cite file and line for every finding."
+    },
+    {
+      "id": "PERF-020",
+      "category": "performance",
+      "title": "Performance Validation Tools",
+      "enforcement": "established",
+      "diff_checkable": "process",
+      "detect": "Apply catalog rule PERF-020 (\"Performance Validation Tools\") to the changed hunks; cite file and line for every finding."
+    },
+    {
+      "id": "PERF-021",
+      "category": "performance",
+      "title": "Profile First Principle (Detailed)",
+      "enforcement": "established",
+      "diff_checkable": "process",
+      "detect": "Apply catalog rule PERF-021 (\"Profile First Principle (Detailed)\") to the changed hunks; cite file and line for every finding."
+    },
+    {
+      "id": "IM-001",
+      "category": "incident-monitoring",
+      "title": "Error tracking (Sentry) on every product",
+      "enforcement": "established",
+      "diff_checkable": "checkout",
+      "detect": "Apply catalog rule IM-001 (\"Error tracking (Sentry) on every product\") to the changed hunks; cite file and line for every finding."
+    },
+    {
+      "id": "IM-002",
+      "category": "incident-monitoring",
+      "title": "Alerting thresholds defined: error rates, latency, downtime",
+      "enforcement": "missing",
+      "detect": "Apply catalog rule IM-002 (\"Alerting thresholds defined: error rates, latency, downtime\") to the changed hunks; cite file and line for every finding."
+    },
+    {
+      "id": "IM-003",
+      "category": "incident-monitoring",
+      "title": "Runbooks for common failures — AI agents can reference these",
+      "enforcement": "established",
+      "detect": "Apply catalog rule IM-003 (\"Runbooks for common failures — AI agents can reference these\") to the changed hunks; cite file and line for every finding."
+    },
+    {
+      "id": "IM-004",
+      "category": "incident-monitoring",
+      "title": "Post-mortems documented and shared across teams",
+      "enforcement": "missing",
+      "detect": "Apply catalog rule IM-004 (\"Post-mortems documented and shared across teams\") to the changed hunks; cite file and line for every finding."
+    },
+    {
+      "id": "IM-005",
+      "category": "incident-monitoring",
+      "title": "Feature flags for safe rollouts and instant rollbacks",
+      "enforcement": "established",
+      "detect": "Apply catalog rule IM-005 (\"Feature flags for safe rollouts and instant rollbacks\") to the changed hunks; cite file and line for every finding."
+    },
+    {
+      "id": "IM-007",
+      "category": "incident-monitoring",
+      "title": "Security Incident Response",
+      "enforcement": "established",
+      "detect": "Apply catalog rule IM-007 (\"Security Incident Response\") to the changed hunks; cite file and line for every finding."
+    },
+    {
+      "id": "IM-008",
+      "category": "incident-monitoring",
+      "title": "Console Error Detection",
+      "enforcement": "established",
+      "diff_checkable": "checkout",
+      "detect": "Apply catalog rule IM-008 (\"Console Error Detection\") to the changed hunks; cite file and line for every finding."
+    },
+    {
+      "id": "IM-014",
+      "category": "incident-monitoring",
+      "title": "Console Error Detection Patterns (Extended)",
+      "enforcement": "established",
+      "detect": "Apply catalog rule IM-014 (\"Console Error Detection Patterns (Extended)\") to the changed hunks; cite file and line for every finding."
+    },
+    {
+      "id": "A11Y-001",
+      "category": "accessibility-wcag",
+      "title": "WCAG 2.1 AA compliance — mandatory for federal contracts",
+      "enforcement": "established",
+      "detect": "Apply catalog rule A11Y-001 (\"WCAG 2.1 AA compliance — mandatory for federal contracts\") to the changed hunks; cite file and line for every finding."
+    },
+    {
+      "id": "A11Y-002",
+      "category": "accessibility-wcag",
+      "title": "Screen reader tested: VoiceOver, NVDA, JAWS on critical flows",
+      "enforcement": "missing",
+      "detect": "Apply catalog rule A11Y-002 (\"Screen reader tested: VoiceOver, NVDA, JAWS on critical flows\") to the changed hunks; cite file and line for every finding."
+    },
+    {
+      "id": "A11Y-003",
+      "category": "accessibility-wcag",
+      "title": "Color contrast ratio ≥ 4.5:1 text, ≥ 3:1 large text & UI",
+      "enforcement": "established",
+      "detect": "Apply catalog rule A11Y-003 (\"Color contrast ratio ≥ 4.5:1 text, ≥ 3:1 large text & UI\") to the changed hunks; cite file and line for every finding."
+    },
+    {
+      "id": "A11Y-004",
+      "category": "accessibility-wcag",
+      "title": "All interactive elements keyboard operable with visible focus",
+      "enforcement": "established",
+      "detect": "Apply catalog rule A11Y-004 (\"All interactive elements keyboard operable with visible focus\") to the changed hunks; cite file and line for every finding."
+    },
+    {
+      "id": "A11Y-005",
+      "category": "accessibility-wcag",
+      "title": "Form inputs: associated labels, descriptive errors, aria-describedby",
+      "enforcement": "established",
+      "detect": "Apply catalog rule A11Y-005 (\"Form inputs: associated labels, descriptive errors, aria-describedby\") to the changed hunks; cite file and line for every finding."
+    },
+    {
+      "id": "A11Y-006",
+      "category": "accessibility-wcag",
+      "title": "Skip navigation links and logical heading hierarchy",
+      "enforcement": "established",
+      "detect": "Apply catalog rule A11Y-006 (\"Skip navigation links and logical heading hierarchy\") to the changed hunks; cite file and line for every finding."
+    },
+    {
+      "id": "A11Y-007",
+      "category": "accessibility-wcag",
+      "title": "No content conveyed by color alone — use icons, text, patterns",
+      "enforcement": "established",
+      "detect": "Apply catalog rule A11Y-007 (\"No content conveyed by color alone — use icons, text, patterns\") to the changed hunks; cite file and line for every finding."
+    },
+    {
+      "id": "A11Y-008",
+      "category": "accessibility-wcag",
+      "title": "Automated a11y testing in CI — block PRs on violations",
+      "enforcement": "partial",
+      "detect": "Apply catalog rule A11Y-008 (\"Automated a11y testing in CI — block PRs on violations\") to the changed hunks; cite file and line for every finding."
+    },
+    {
+      "id": "A11Y-009",
+      "category": "accessibility-wcag",
+      "title": "Loading State Accessibility",
+      "enforcement": "established",
+      "detect": "Apply catalog rule A11Y-009 (\"Loading State Accessibility\") to the changed hunks; cite file and line for every finding."
+    },
+    {
+      "id": "A11Y-013",
+      "category": "accessibility-wcag",
+      "title": "Semantic HTML Mapping",
+      "enforcement": "established",
+      "detect": "Apply catalog rule A11Y-013 (\"Semantic HTML Mapping\") to the changed hunks; cite file and line for every finding."
+    },
+    {
+      "id": "A11Y-014",
+      "category": "accessibility-wcag",
+      "title": "Keyboard Requirements (7 Items)",
+      "enforcement": "established",
+      "detect": "Apply catalog rule A11Y-014 (\"Keyboard Requirements (7 Items)\") to the changed hunks; cite file and line for every finding."
+    },
+    {
+      "id": "A11Y-015",
+      "category": "accessibility-wcag",
+      "title": "Form Accessibility",
+      "enforcement": "established",
+      "detect": "Apply catalog rule A11Y-015 (\"Form Accessibility\") to the changed hunks; cite file and line for every finding."
+    },
+    {
+      "id": "A11Y-016",
+      "category": "accessibility-wcag",
+      "title": "Screen Reader Landmarks",
+      "enforcement": "established",
+      "detect": "Apply catalog rule A11Y-016 (\"Screen Reader Landmarks\") to the changed hunks; cite file and line for every finding."
+    },
+    {
+      "id": "A11Y-017",
+      "category": "accessibility-wcag",
+      "title": "Color Contrast Specifics",
+      "enforcement": "established",
+      "detect": "Apply catalog rule A11Y-017 (\"Color Contrast Specifics\") to the changed hunks; cite file and line for every finding."
+    },
+    {
+      "id": "A11Y-018",
+      "category": "accessibility-wcag",
+      "title": "No Nested Interactive Elements",
+      "enforcement": "established",
+      "detect": "Apply catalog rule A11Y-018 (\"No Nested Interactive Elements\") to the changed hunks; cite file and line for every finding."
+    },
+    {
+      "id": "A11Y-019",
+      "category": "accessibility-wcag",
+      "title": "No Unnamed Header/Toolbar Controls",
+      "enforcement": "established",
+      "diff_checkable": "yes",
+      "detect": "Apply catalog rule A11Y-019 (\"No Unnamed Header/Toolbar Controls\") to the changed hunks; cite file and line for every finding."
+    },
+    {
+      "id": "A11Y-020",
+      "category": "accessibility-wcag",
+      "title": "No Invalid Nav ARIA",
+      "enforcement": "established",
+      "detect": "Apply catalog rule A11Y-020 (\"No Invalid Nav ARIA\") to the changed hunks; cite file and line for every finding."
+    },
+    {
+      "id": "A11Y-021",
+      "category": "accessibility-wcag",
+      "title": "Focus Management",
+      "enforcement": "established",
+      "detect": "Apply catalog rule A11Y-021 (\"Focus Management\") to the changed hunks; cite file and line for every finding."
+    },
+    {
+      "id": "A11Y-022",
+      "category": "accessibility-wcag",
+      "title": "Icon-Only Button Rule",
+      "enforcement": "established",
+      "diff_checkable": "yes",
+      "detect": "Apply catalog rule A11Y-022 (\"Icon-Only Button Rule\") to the changed hunks; cite file and line for every finding."
+    },
+    {
+      "id": "MOB-001",
+      "category": "mobile-best-practices",
+      "title": "Mobile-first CSS: design for 320px, scale up with breakpoints",
+      "enforcement": "established",
+      "detect": "Apply catalog rule MOB-001 (\"Mobile-first CSS: design for 320px, scale up with breakpoints\") to the changed hunks; cite file and line for every finding."
+    },
+    {
+      "id": "MOB-002",
+      "category": "mobile-best-practices",
+      "title": "Touch targets ≥ 44×44px with adequate spacing between actions",
+      "enforcement": "established",
+      "detect": "Apply catalog rule MOB-002 (\"Touch targets ≥ 44×44px with adequate spacing between actions\") to the changed hunks; cite file and line for every finding."
+    },
+    {
+      "id": "MOB-003",
+      "category": "mobile-best-practices",
+      "title": "No hover-only interactions — all actions accessible via tap",
+      "enforcement": "established",
+      "detect": "Apply catalog rule MOB-003 (\"No hover-only interactions — all actions accessible via tap\") to the changed hunks; cite file and line for every finding."
+    },
+    {
+      "id": "MOB-004",
+      "category": "mobile-best-practices",
+      "title": "Responsive images: srcset, sizes, lazy loading with aspect ratios",
+      "enforcement": "established",
+      "detect": "Apply catalog rule MOB-004 (\"Responsive images: srcset, sizes, lazy loading with aspect ratios\") to the changed hunks; cite file and line for every finding."
+    },
+    {
+      "id": "MOB-005",
+      "category": "mobile-best-practices",
+      "title": "Test on real devices: iOS Safari, Android Chrome minimum",
+      "enforcement": "missing",
+      "detect": "Apply catalog rule MOB-005 (\"Test on real devices: iOS Safari, Android Chrome minimum\") to the changed hunks; cite file and line for every finding."
+    },
+    {
+      "id": "MOB-006",
+      "category": "mobile-best-practices",
+      "title": "Viewport meta tag: no user-scalable=no — allow pinch zoom",
+      "enforcement": "established",
+      "detect": "Apply catalog rule MOB-006 (\"Viewport meta tag: no user-scalable=no — allow pinch zoom\") to the changed hunks; cite file and line for every finding."
+    },
+    {
+      "id": "MOB-007",
+      "category": "mobile-best-practices",
+      "title": "Bottom-sheet patterns for mobile modals, not desktop dialogs",
+      "enforcement": "missing",
+      "detect": "Apply catalog rule MOB-007 (\"Bottom-sheet patterns for mobile modals, not desktop dialogs\") to the changed hunks; cite file and line for every finding."
+    },
+    {
+      "id": "MOB-008",
+      "category": "mobile-best-practices",
+      "title": "Offline-aware: graceful degradation with service worker caching",
+      "enforcement": "missing",
+      "detect": "Apply catalog rule MOB-008 (\"Offline-aware: graceful degradation with service worker caching\") to the changed hunks; cite file and line for every finding."
+    },
+    {
+      "id": "MOB-009",
+      "category": "mobile-best-practices",
+      "title": "iOS-Specific Patterns",
+      "enforcement": "established",
+      "detect": "Apply catalog rule MOB-009 (\"iOS-Specific Patterns\") to the changed hunks; cite file and line for every finding."
+    },
+    {
+      "id": "MOB-010",
+      "category": "mobile-best-practices",
+      "title": "Data Density Responsiveness",
+      "enforcement": "established",
+      "detect": "Apply catalog rule MOB-010 (\"Data Density Responsiveness\") to the changed hunks; cite file and line for every finding."
+    },
+    {
+      "id": "MOB-011",
+      "category": "mobile-best-practices",
+      "title": "Scroll/Overflow",
+      "enforcement": "established",
+      "detect": "Apply catalog rule MOB-011 (\"Scroll/Overflow\") to the changed hunks; cite file and line for every finding."
+    },
+    {
+      "id": "MOB-017",
+      "category": "mobile-best-practices",
+      "title": "Mobile Keyboard Types",
+      "enforcement": "established",
+      "detect": "Apply catalog rule MOB-017 (\"Mobile Keyboard Types\") to the changed hunks; cite file and line for every finding."
+    },
+    {
+      "id": "MOB-019",
+      "category": "mobile-best-practices",
+      "title": "Data Density Responsiveness (Expanded)",
+      "enforcement": "established",
+      "detect": "Apply catalog rule MOB-019 (\"Data Density Responsiveness (Expanded)\") to the changed hunks; cite file and line for every finding."
+    },
+    {
+      "id": "MOB-020",
+      "category": "mobile-best-practices",
+      "title": "Loading States",
+      "enforcement": "established",
+      "detect": "Apply catalog rule MOB-020 (\"Loading States\") to the changed hunks; cite file and line for every finding."
+    },
+    {
+      "id": "MOB-021",
+      "category": "mobile-best-practices",
+      "title": "Scroll/Overflow (Expanded)",
+      "enforcement": "established",
+      "detect": "Apply catalog rule MOB-021 (\"Scroll/Overflow (Expanded)\") to the changed hunks; cite file and line for every finding."
+    },
+    {
+      "id": "MOB-023",
+      "category": "mobile-best-practices",
+      "title": "Tab Order",
+      "enforcement": "established",
+      "detect": "Apply catalog rule MOB-023 (\"Tab Order\") to the changed hunks; cite file and line for every finding."
+    },
+    {
+      "id": "PRIV-001",
+      "category": "gdpr-data-privacy",
+      "title": "Cookie consent banner with granular opt-in before any tracking",
+      "enforcement": "missing",
+      "detect": "Apply catalog rule PRIV-001 (\"Cookie consent banner with granular opt-in before any tracking\") to the changed hunks; cite file and line for every finding."
+    },
+    {
+      "id": "PRIV-002",
+      "category": "gdpr-data-privacy",
+      "title": "Privacy policy and terms accessible from every page",
+      "enforcement": "missing",
+      "detect": "Apply catalog rule PRIV-002 (\"Privacy policy and terms accessible from every page\") to the changed hunks; cite file and line for every finding."
+    },
+    {
+      "id": "PRIV-003",
+      "category": "gdpr-data-privacy",
+      "title": "Data processing agreements documented for all third-party services",
+      "enforcement": "missing",
+      "detect": "Apply catalog rule PRIV-003 (\"Data processing agreements documented for all third-party services\") to the changed hunks; cite file and line for every finding."
+    },
+    {
+      "id": "PRIV-004",
+      "category": "gdpr-data-privacy",
+      "title": "User data export (Right to Portability) — downloadable JSON/CSV",
+      "enforcement": "partial",
+      "detect": "Apply catalog rule PRIV-004 (\"User data export (Right to Portability) — downloadable JSON/CSV\") to the changed hunks; cite file and line for every finding."
+    },
+    {
+      "id": "PRIV-005",
+      "category": "gdpr-data-privacy",
+      "title": "Account deletion flow: hard delete with 30-day grace period",
+      "enforcement": "missing",
+      "detect": "Apply catalog rule PRIV-005 (\"Account deletion flow: hard delete with 30-day grace period\") to the changed hunks; cite file and line for every finding."
+    },
+    {
+      "id": "PRIV-006",
+      "category": "gdpr-data-privacy",
+      "title": "Data minimization: only collect what is strictly necessary",
+      "enforcement": "established",
+      "detect": "Apply catalog rule PRIV-006 (\"Data minimization: only collect what is strictly necessary\") to the changed hunks; cite file and line for every finding."
+    },
+    {
+      "id": "PRIV-007",
+      "category": "gdpr-data-privacy",
+      "title": "Encryption at rest and in transit — TLS 1.2+ enforced",
+      "enforcement": "established",
+      "severity": "high",
+      "detect": "Apply catalog rule PRIV-007 (\"Encryption at rest and in transit — TLS 1.2+ enforced\") to the changed hunks; cite file and line for every finding."
+    },
+    {
+      "id": "PRIV-008",
+      "category": "gdpr-data-privacy",
+      "title": "Audit log of data access for sensitive PII fields",
+      "enforcement": "established",
+      "severity": "high",
+      "detect": "Apply catalog rule PRIV-008 (\"Audit log of data access for sensitive PII fields\") to the changed hunks; cite file and line for every finding."
+    },
+    {
+      "id": "PRIV-012",
+      "category": "gdpr-data-privacy",
+      "title": "OWASP Top 10 Coverage",
+      "enforcement": "established",
+      "severity": "high",
+      "detect": "Apply catalog rule PRIV-012 (\"OWASP Top 10 Coverage\") to the changed hunks; cite file and line for every finding."
+    },
+    {
+      "id": "I18N-001",
+      "category": "internationalization",
+      "title": "All user-facing strings externalized into translation files (JSON)",
+      "enforcement": "established",
+      "diff_checkable": "yes",
+      "detect": "Apply catalog rule I18N-001 (\"All user-facing strings externalized into translation files (JSON)\") to the changed hunks; cite file and line for every finding."
+    },
+    {
+      "id": "I18N-004",
+      "category": "internationalization",
+      "title": "Date, time, number, and currency formatting via Intl API",
+      "enforcement": "established",
+      "detect": "Apply catalog rule I18N-004 (\"Date, time, number, and currency formatting via Intl API\") to the changed hunks; cite file and line for every finding."
+    },
+    {
+      "id": "I18N-005",
+      "category": "internationalization",
+      "title": "Pluralization rules handled per locale — not string concatenation",
+      "enforcement": "established",
+      "detect": "Apply catalog rule I18N-005 (\"Pluralization rules handled per locale — not string concatenation\") to the changed hunks; cite file and line for every finding."
+    },
+    {
+      "id": "I18N-006",
+      "category": "internationalization",
+      "title": "UTF-8 everywhere: database, API responses, HTML charset",
+      "enforcement": "established",
+      "detect": "Apply catalog rule I18N-006 (\"UTF-8 everywhere: database, API responses, HTML charset\") to the changed hunks; cite file and line for every finding."
+    },
+    {
+      "id": "I18N-007",
+      "category": "internationalization",
+      "title": "Translation workflow: CI check for missing keys across locales",
+      "enforcement": "missing",
+      "detect": "Apply catalog rule I18N-007 (\"Translation workflow: CI check for missing keys across locales\") to the changed hunks; cite file and line for every finding."
+    },
+    {
+      "id": "I18N-008",
+      "category": "internationalization",
+      "title": "UI tested with long strings (German) and short strings (CJK)",
+      "enforcement": "established",
+      "detect": "Apply catalog rule I18N-008 (\"UI tested with long strings (German) and short strings (CJK)\") to the changed hunks; cite file and line for every finding."
+    },
+    {
+      "id": "I18N-014",
+      "category": "internationalization",
+      "title": "Translation Key Naming",
+      "enforcement": "established",
+      "detect": "Apply catalog rule I18N-014 (\"Translation Key Naming\") to the changed hunks; cite file and line for every finding."
+    },
+    {
+      "id": "I18N-015",
+      "category": "internationalization",
+      "title": "No String Concatenation",
+      "enforcement": "established",
+      "detect": "Apply catalog rule I18N-015 (\"No String Concatenation\") to the changed hunks; cite file and line for every finding."
+    }
+  ],
+  "surface_path_globs": {
+    "security_privacy": [
+      "**/*"
+    ],
+    "risk": [
+      "**/*"
+    ]
+  }
+}
