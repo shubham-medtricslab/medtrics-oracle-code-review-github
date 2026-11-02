@@ -14,9 +14,9 @@ Why this is not just `json.load`:
   FA-009 - one silently wins and the other's severity vanishes. Counting is not
   checking.
 
-* **Resolution happens in exactly one place.** Category default -> per-surface
-  floor -> per-rule override -> enforcement cap, in that order, for every rule.
-  See `resolve_severity` for why the floor sits where it does.
+* **Resolution happens in exactly one place**, and it is exactly three layers:
+  category default -> explicit per-rule severity -> enforcement cap. Surface
+  severity floors are deliberately *not* among them; see `resolve_severity`.
 
 * **An empty surface is a first-class result, not an empty list.** Dispatching
   a reviewer with no rules spends a model call to produce a confident-looking
@@ -82,6 +82,10 @@ class DependencyCycleError(RulepackError):
 
 class EmptySurfaceError(RulepackError):
     """A reviewer surface was requested but resolved to zero rules."""
+
+
+class DeadOverlayError(RulepackError):
+    """An overlay declares no way to be activated, so it can never fire."""
 
 
 def _as_tuple(value):
@@ -185,10 +189,25 @@ def read_pack(root, pack_id, schema=None):
             id=oid,
             guidance=o.get("guidance", ""),
             path_prefixes=_as_tuple(o.get("path_prefixes")),
+            activate_on_surfaces=_as_tuple(o.get("activate_on_surfaces")),
             pack=pack_id,
         )
         for oid, o in sorted(raw.get("overlays", {}).items())
     )
+    for overlay in overlays:
+        if not overlay.path_prefixes and not overlay.activate_on_surfaces:
+            raise DeadOverlayError(
+                f"{path}: overlay {overlay.id!r} declares neither "
+                f"path_prefixes nor activate_on_surfaces, so nothing can ever "
+                f"activate it; dead guidance should fail loudly rather than "
+                f"sit there looking configured"
+            )
+        for surface in overlay.activate_on_surfaces:
+            if surface not in SURFACES:
+                raise RulepackError(
+                    f"{path}: overlay {overlay.id!r} activates on unknown "
+                    f"surface {surface!r}"
+                )
 
     return Pack(
         id=pack_id,
@@ -201,7 +220,9 @@ def read_pack(root, pack_id, schema=None):
         detectors=detectors,
         overlays=overlays,
         surface_path_globs=dict(raw.get("surface_path_globs", {})),
-        severity_floors=dict(raw.get("severity_floors", {})),
+        suggested_severity_floors=dict(
+            raw.get("suggested_severity_floors", {})
+        ),
     )
 
 
@@ -238,30 +259,30 @@ def _resolve_order(root, pack_ids, schema):
     return order
 
 
-def resolve_severity(rule, category, floor):
+def resolve_severity(rule, category):
     """
-    The three resolution layers, in the one order that is correct.
+    The three resolution layers, in order.
 
-      1. category default, raised to the surface floor if one applies
+      1. the category default
       2. the rule's own `severity`, when it declares one
       3. the enforcement cap: missing/partial force `low`
 
-    The floor applies at the *default* layer, not on top of the resolved value.
-    That is deliberate. A floor's job is to stop a surface silently inheriting a
-    soft category default - `rls` rules should not land at `medium` just because
-    `supabase-data-layer` defaults there. It is not a veto on a reviewed,
-    explicit per-rule decision: DL-031 is `rls` at `medium` on purpose, and the
-    golden snapshot records that. Applying the floor last would quietly promote
-    it to `high` and nothing would complain, because a count-based check cannot
-    see a severity change.
+    **Surface severity floors are deliberately absent.** They are a
+    finding-time policy, not a materialization one. v0.5.0 kept the `rls` floor
+    in config (`principles.surface_overrides.*.severity_floor`) and in the
+    rls-reviewer prompt; `rubric.py build_rules()` contains no floor at all.
 
-    The enforcement cap is genuinely last, as in v0.5.0. A rule describing
-    practice the codebase has not adopted is advisory no matter which surface it
-    sits on or how loudly the category shouts.
+    The golden snapshot settles it: DL-031 is surface `rls` at severity
+    `medium`. No materialization-time floor of `high`, under any ordering,
+    produces that row. Applying one here would also make static pack content
+    depend on a per-repo config value, which is backwards - a repo setting
+    `severity_floor: critical` must not require editing a pack.
+
+    The enforcement cap is last, as in v0.5.0. A rule describing practice the
+    codebase has not adopted is advisory no matter how loudly its category
+    shouts.
     """
     severity = category.default_severity
-    if floor:
-        severity = max_severity(severity, floor)
     if rule.severity:
         severity = rule.severity
     if rule.enforcement in ADVISORY_ENFORCEMENT:
@@ -273,14 +294,16 @@ class Rubric:
     """The merged, resolved result of loading one or more packs."""
 
     def __init__(self, packs, rules, categories, detectors, overlays,
-                 surface_path_globs, severity_floors):
+                 surface_path_globs, suggested_severity_floors):
         self.packs = tuple(packs)
         self.rules = tuple(rules)
         self.categories = dict(categories)
         self.detectors = tuple(detectors)
         self.overlays = tuple(overlays)
         self.surface_path_globs = surface_path_globs
-        self.severity_floors = dict(severity_floors)
+        #: Advisory. Exposed so org config can be seeded from the packs, and
+        #: for no other reason - nothing in materialization reads this.
+        self.suggested_severity_floors = dict(suggested_severity_floors)
         self._by_surface = {s: [] for s in SURFACES}
         self._by_id = {}
         for rule in self.rules:
@@ -354,6 +377,11 @@ class Rubric:
         matches.sort(key=lambda m: (-m[0], m[1].id))
         return tuple(o for _, o in matches)
 
+    def overlays_for_surface(self, surface):
+        """Cross-cutting overlays that activate on a reviewer surface."""
+        return tuple(o for o in self.overlays
+                     if surface in o.activate_on_surfaces)
+
     def detectors_for_path(self, path):
         from . import globs as _globs
         return tuple(
@@ -392,12 +420,15 @@ def load(root, pack_ids, schema=None):
                 )
             categories[cat.id] = cat
 
+    # Advisory only: collected so org config can be seeded from the packs.
+    # Deliberately not passed to `resolve_severity` - see its docstring.
     floors = {}
     for pack in packs:
-        for surface, severity in pack.severity_floors.items():
+        for surface, severity in pack.suggested_severity_floors.items():
             if surface not in SURFACES:
                 raise RulepackError(
-                    f"{pack.id}: severity floor for unknown surface {surface!r}"
+                    f"{pack.id}: suggested severity floor for unknown surface "
+                    f"{surface!r}"
                 )
             floors[surface] = (
                 max_severity(floors[surface], severity)
@@ -441,7 +472,7 @@ def load(root, pack_ids, schema=None):
                 )
 
             surface = rule.surface or category.default_surface
-            severity = resolve_severity(rule, category, floors.get(surface))
+            severity = resolve_severity(rule, category)
             resolved.append(ResolvedRule(
                 id=rule.id,
                 category=rule.category,

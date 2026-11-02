@@ -25,6 +25,7 @@ Typical use:
 """
 from .detect import run as run_detectors
 from .loader import (
+    DeadOverlayError,
     DependencyCycleError,
     DuplicateCategoryError,
     DuplicateDetectorKeyError,
@@ -61,6 +62,7 @@ __all__ = [
     "DuplicateRuleIdError", "DuplicateCategoryError",
     "DuplicateDetectorKeyError", "UnknownCategoryError",
     "UnknownPrincipleError", "DependencyCycleError", "EmptySurfaceError",
+    "DeadOverlayError",
     "discover", "load", "load_all", "read_pack", "resolve_severity",
     "run_detectors",
 ]

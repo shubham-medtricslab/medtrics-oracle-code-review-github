@@ -53,7 +53,7 @@ def cmd_validate(args):
             {d.emits_principle_id for d in rubric.detectors}
         ),
         "overlays": len(rubric.overlays),
-        "severity_floors": rubric.severity_floors,
+        "suggested_severity_floors": rubric.suggested_severity_floors,
         "populated_surfaces": list(rubric.populated_surfaces()),
         "empty_surfaces": list(empty),
         "ok": True,

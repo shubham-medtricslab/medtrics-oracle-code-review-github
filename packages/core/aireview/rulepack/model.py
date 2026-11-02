@@ -102,6 +102,7 @@ class Overlay:
     guidance: str
     pack: str
     path_prefixes: tuple = ()
+    activate_on_surfaces: tuple = ()
 
 
 @dataclass(frozen=True)
@@ -116,4 +117,5 @@ class Pack:
     detectors: tuple = ()
     overlays: tuple = ()
     surface_path_globs: dict = field(default_factory=dict)
-    severity_floors: dict = field(default_factory=dict)
+    #: Advisory only. Seeds org config; never read during materialization.
+    suggested_severity_floors: dict = field(default_factory=dict)

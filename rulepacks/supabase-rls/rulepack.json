@@ -495,7 +495,7 @@
       "**/functions/**/*.ts"
     ]
   },
-  "severity_floors": {
+  "suggested_severity_floors": {
     "rls": "high"
   }
 }

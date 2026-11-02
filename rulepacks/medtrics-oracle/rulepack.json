@@ -862,9 +862,17 @@
       "guidance": "Oracle domain overlay for `work-hours`. Load this domain's conventions alongside the surface rubric when files under these prefixes change."
     },
     "permissions": {
-      "guidance": "Authorization overlay. Apply to any change touching RLS policies, permission checks or security-definer functions. Activated by the `rls` and `security_privacy` surfaces rather than by path."
+      "activate_on_surfaces": [
+        "rls",
+        "security_privacy"
+      ],
+      "guidance": "Authorization overlay. Apply to any change touching RLS policies, permission checks or security-definer functions."
     },
     "portals": {
+      "activate_on_surfaces": [
+        "frontend",
+        "data_layer"
+      ],
       "guidance": "Portal behaviour overlay: organization / institution / admin / personal differences. Apply when a change alters behaviour that varies by portal."
     }
   }

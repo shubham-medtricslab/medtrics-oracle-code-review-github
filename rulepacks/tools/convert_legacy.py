@@ -208,11 +208,13 @@ SURFACE_PATH_GLOBS = {
     "medtrics-oracle": {},
 }
 
-# Only `supabase-rls` introduces the `rls` surface, so the floor belongs there.
-# A floor raises the *category default* for rules on that surface; an explicit
-# per-rule `severity` is a reviewed exception and still wins (DL-031 is exactly
-# that case, and is `medium` in the golden snapshot).
-SEVERITY_FLOORS = {
+# ADVISORY ONLY (contract v1.2). This seeds org config; it is never applied
+# during rule materialization. v0.5.0 kept the floor in config and in the
+# rls-reviewer prompt, never in `rubric.py build_rules()` - and DL-031 proves
+# it, sitting in the golden snapshot as surface `rls` at severity `medium`.
+# Only `supabase-rls` introduces the `rls` surface, so the suggestion lives
+# there.
+SUGGESTED_SEVERITY_FLOORS = {
     "supabase-rls": {"rls": "high"},
 }
 
@@ -257,16 +259,21 @@ DETECTOR_PLAN = {
 FLAG_NAMES = [("IGNORECASE", re.IGNORECASE), ("MULTILINE", re.MULTILINE),
               ("DOTALL", re.DOTALL)]
 
+# The two cross-cutting overlays from the legacy `modules/index.md`. They are
+# explicitly not path-resolved - "applied to any RLS/policy change" is a
+# surface condition, not a directory - so they use `activate_on_surfaces`
+# (contract v1.2). Without it they would be schema-valid but permanently dead.
 CROSS_CUTTING_OVERLAYS = {
     "permissions": (
+        ["rls", "security_privacy"],
         "Authorization overlay. Apply to any change touching RLS policies, "
-        "permission checks or security-definer functions. Activated by the "
-        "`rls` and `security_privacy` surfaces rather than by path."
+        "permission checks or security-definer functions.",
     ),
     "portals": (
+        ["frontend", "data_layer"],
         "Portal behaviour overlay: organization / institution / admin / "
         "personal differences. Apply when a change alters behaviour that "
-        "varies by portal."
+        "varies by portal.",
     ),
 }
 
@@ -373,8 +380,11 @@ def build_overlays(rubric_mod):
                 f"these prefixes change."
             ),
         }
-    for name, guidance in CROSS_CUTTING_OVERLAYS.items():
-        overlays[name] = {"guidance": guidance}
+    for name, (surfaces, guidance) in CROSS_CUTTING_OVERLAYS.items():
+        overlays[name] = {
+            "activate_on_surfaces": list(surfaces),
+            "guidance": guidance,
+        }
     return overlays
 
 
@@ -411,8 +421,8 @@ def build_packs(catalog_data, detectors_mod, rubric_mod):
             pack["detectors"] = dets[pid]
         if SURFACE_PATH_GLOBS.get(pid):
             pack["surface_path_globs"] = SURFACE_PATH_GLOBS[pid]
-        if SEVERITY_FLOORS.get(pid):
-            pack["severity_floors"] = SEVERITY_FLOORS[pid]
+        if SUGGESTED_SEVERITY_FLOORS.get(pid):
+            pack["suggested_severity_floors"] = SUGGESTED_SEVERITY_FLOORS[pid]
         if pid == "medtrics-oracle":
             pack["overlays"] = overlays
         packs[pid] = pack
