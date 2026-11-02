@@ -205,7 +205,7 @@ class SummaryContentTest(unittest.TestCase):
         rendered = rs.render("ok", record, None, {"blocking": False, "dry_run": True})
         self.assertIn("Incomplete", rendered["summary"])
         self.assertIn("300 of 1240", rendered["summary"])
-        self.assertIn("security_privacy", rendered["summary"])
+        self.assertIn("`rls`", rendered["summary"])
 
     def test_partial_dimensions_are_named(self):
         record = fixture("run-record.incomplete.json")

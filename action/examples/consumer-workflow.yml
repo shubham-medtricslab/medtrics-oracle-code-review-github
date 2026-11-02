@@ -41,6 +41,11 @@ jobs:
       # Leave blocking off until the signal has earned it. With it off the
       # check is always `neutral` and cannot prevent a merge.
       blocking: false
+      # Packs resolve by ID against the registry, never by path. Omit this to
+      # get the core default set. Available: base, react-ts, supabase-rls,
+      # org-practice, medtrics-oracle -- dependencies are pulled in
+      # automatically, so `supabase-rls` already implies `base`.
+      rulepacks: base, react-ts
     secrets:
       app_private_key: ${{ secrets.AI_REVIEW_APP_PRIVATE_KEY }}
       anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}

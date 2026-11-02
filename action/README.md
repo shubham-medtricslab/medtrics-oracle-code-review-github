@@ -267,6 +267,12 @@ override them.
 (`standard`), `max_changed_files` (`400`), `reviewer_timeout_seconds` (`600`),
 `max_budget_usd`.
 
+`rulepacks` takes pack **IDs**, comma- or newline-separated: `base`,
+`react-ts`, `supabase-rls`, `org-practice`, `medtrics-oracle`. Dependencies
+resolve automatically, so `supabase-rls` already implies `base`. Packs are
+never addressable by path — the registry root is supplied by core, and config
+values that look like filesystem paths are rejected.
+
 **Safety switches:** `dry_run` (**`true`**), `blocking` (**`false`**),
 `enabled` (`true`), `kill_switch` (`false`), `skip_forks` (**`true`**),
 `skip_drafts` (**`true`**).
@@ -313,11 +319,19 @@ applied.
 ## Testing
 
 ```bash
-python3 -m unittest discover -s action/tests -t action/tests   # 100 tests
-python3 tools/stdlib_lint.py packages/core
+./run-gates.sh                                                 # every gate
+python3 -m unittest discover -s action/tests -t action/tests   # 106 tests
 actionlint                                                     # workflows
 actionlint action/examples/*.yml
 ```
+
+The fixtures are validated against `contracts/run-record.schema.json` on every
+run (`test_fixtures_match_contract.py`), including its
+`additionalProperties: false`. Without that, the renderer would be tested
+against shapes invented here, and the drift would be silent — the tests would
+keep passing while testing the wrong thing. The fixtures also carry real
+principle IDs checked against `contracts/golden-rubric.tsv`, so severities and
+surfaces match what will actually arrive.
 
 `actionlint` does not cover composite `action.yml`, which is where most of this
 workstream's shell lives. `test_workflow_hygiene.py` closes that gap: it runs
@@ -340,7 +354,7 @@ action/
     resolve_config.py             base-ref config -> layered JSON for core
     minyaml.py                    restricted YAML subset
     gh.py                         stdlib REST client, retries and backoff
-  tests/                          100 tests, stdlib unittest
+  tests/                          106 tests, stdlib unittest
   examples/
     consumer-workflow.yml         copy this into your repo
     reaper-workflow.yml           optional; install if the check is required

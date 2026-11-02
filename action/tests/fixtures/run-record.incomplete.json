@@ -15,7 +15,7 @@
     "truncation_reason": "pagination cap reached",
     "files_seen": 300,
     "files_total": 1240,
-    "partial_dimensions": ["security_privacy"],
+    "partial_dimensions": ["rls"],
     "local_checkout": true
   },
   "findings": [],
