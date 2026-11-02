@@ -45,7 +45,19 @@ PACK_ID_RE = re.compile(r"^[a-z0-9][a-z0-9-]*$")
 
 
 class RulepackError(Exception):
-    """Base class for every rulepack load/resolution failure."""
+    """
+    Base class for every rulepack load/resolution failure.
+
+    Carries `resolved_pack_ids` - the packs that loaded cleanly before the
+    failure - and `failing_pack_id`. Callers need both to distinguish "that
+    pack was never requested" from "that pack was requested and is broken",
+    which warrant very different things said in a review body.
+    """
+
+    def __init__(self, *args, resolved_pack_ids=(), failing_pack_id=None):
+        super().__init__(*args)
+        self.resolved_pack_ids = frozenset(resolved_pack_ids)
+        self.failing_pack_id = failing_pack_id
 
 
 class PackNotFoundError(RulepackError):
@@ -226,13 +238,16 @@ def read_pack(root, pack_id, schema=None):
     )
 
 
-def _resolve_order(root, pack_ids, schema):
+def _resolve_order(root, pack_ids, schema, resolved):
     """
     Depth-first topological order over `requires`, dependencies first.
 
     Cycles are rejected rather than broken arbitrarily: a cycle means two packs
     each claim to build on the other, and silently picking an order would make
     the resolved rubric depend on dict iteration order.
+
+    `resolved` is a caller-owned set that accumulates the ids read cleanly, so
+    it survives an exception thrown part-way through.
     """
     packs = {}
     order = []
@@ -243,14 +258,23 @@ def _resolve_order(root, pack_ids, schema):
             return
         if pid in visiting:
             cycle = " -> ".join(visiting[visiting.index(pid):] + [pid])
-            raise DependencyCycleError(f"rulepack requires cycle: {cycle}")
+            raise DependencyCycleError(
+                f"rulepack requires cycle: {cycle}",
+                resolved_pack_ids=resolved, failing_pack_id=pid,
+            )
         visiting.append(pid)
-        pack = read_pack(root, pid, schema)
+        try:
+            pack = read_pack(root, pid, schema)
+        except RulepackError as exc:
+            exc.resolved_pack_ids = frozenset(resolved)
+            exc.failing_pack_id = exc.failing_pack_id or pid
+            raise
         for dep in pack.requires:
             _check_pack_id(dep)
             visit(dep)
         visiting.pop()
         packs[pid] = pack
+        resolved.add(pid)
         order.append(pack)
 
     for pid in pack_ids:
@@ -312,7 +336,20 @@ class Rubric:
 
     @property
     def pack_ids(self):
+        """Resolved pack ids in dependency order (dependencies first)."""
         return tuple(p.id for p in self.packs)
+
+    def loaded_pack_ids(self):
+        """
+        The set of pack ids actually resolved, including `requires` closure.
+
+        This is the source of truth for `validate_agent_output`'s
+        `allowed_rulepack_ids`: a finding claiming a pack that was never
+        loaded is a fabrication and must be rejected, not relabelled. The
+        closure matters - a repo asking for `supabase-rls` also gets `base`,
+        and a legitimate `base` finding must not be thrown away.
+        """
+        return frozenset(p.id for p in self.packs)
 
     def by_surface(self, surface):
         """Resolved rules for `surface`, sorted by id. May be empty."""
@@ -400,14 +437,28 @@ def load(root, pack_ids, schema=None):
 
     `root` comes from core, not from repository config. `pack_ids` are bare
     identifiers.
+
+    On failure the raised `RulepackError` carries `resolved_pack_ids` and
+    `failing_pack_id`, so a caller can still tell which packs are legitimate
+    rather than having to treat every id as unknown.
     """
+    read_ok = set()
+    try:
+        return _load(root, pack_ids, schema, read_ok)
+    except RulepackError as exc:
+        if not exc.resolved_pack_ids:
+            exc.resolved_pack_ids = frozenset(read_ok)
+        raise
+
+
+def _load(root, pack_ids, schema, read_ok):
     if schema is None:
         schema = jsonschema_mini.load_schema(
             jsonschema_mini.default_schema_path()
         )
     _assert_surfaces_match_schema(schema)
 
-    packs = _resolve_order(root, list(pack_ids), schema)
+    packs = _resolve_order(root, list(pack_ids), schema, read_ok)
 
     categories = {}
     for pack in packs:
