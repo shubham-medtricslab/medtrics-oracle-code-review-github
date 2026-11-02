@@ -84,6 +84,7 @@ def validate_agent_output(
     max_body_chars: int = 65_535,
     default_rulepack_id: str = "unknown",
     checkout_root: Optional[str] = None,
+    allowed_rulepack_ids: Optional[frozenset[str]] = None,
 ) -> ValidationResult:
     """Turn untrusted agent output into a safe, posted-ready finding set.
 
@@ -107,6 +108,11 @@ def validate_agent_output(
       - `default_rulepack_id` fills `rulepack_id` when a finding omits it, since
         run-record requires that field. A finding naming an unknown rulepack is
         rejected, not silently relabelled.
+      - `allowed_rulepack_ids` (contract v1.3) is the set membership is tested
+        against. The rulepack loader owns it and the caller passes it. When it
+        is None only the SHAPE of `rulepack_id` is checked - so a caller that
+        forgets to pass it gets the weaker check silently. Pass it from the
+        loader's resolved pack set wherever one exists.
       - `checkout_root`, when given, is the directory paths are resolved against
         for the symlink check. Without it, symlink detection is skipped and only
         the lexical checks apply - so pass it whenever a checkout exists.
