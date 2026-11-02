@@ -306,12 +306,12 @@ def validate_agent_output(
         evidence_raw = item.get("evidence")
         evidence = sanitize_code(evidence_raw, max_chars=MAX_EVIDENCE) or None
 
-        # Consumed into the dedup key but NOT emitted on the finding:
-        # run-record.schema.json sets additionalProperties:false on a finding
-        # and has no `detector_key` member, so emitting it would make a valid
-        # run record fail its own schema. Flagged to the lead.
+        # Both consumed into the dedup key AND emitted. A run record that
+        # cannot say which of two detectors sharing a principle id fired
+        # makes that collision invisible at diagnosis time, which is the
+        # same problem one step later.
         detector_key = item.get("detector_key")
-        if not isinstance(detector_key, str):
+        if not isinstance(detector_key, str) or not detector_key.strip():
             detector_key = None
 
         finding = {
@@ -322,6 +322,7 @@ def validate_agent_output(
                                    evidence=evidence_raw if isinstance(evidence_raw, str) else "",
                                    detector_key=detector_key),
             "principle_id": principle_id,
+            "detector_key": detector_key,
             "rulepack_id": rulepack_id,
             "severity": severity,
             "surface": item.get("surface") if isinstance(item.get("surface"), str)
