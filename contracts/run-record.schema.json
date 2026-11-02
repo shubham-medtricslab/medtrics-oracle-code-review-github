@@ -1,0 +1,138 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://medtrics.internal/ai-code-review/contracts/run-record.schema.json",
+  "title": "RunRecord",
+  "description": "FROZEN CONTRACT v1. The single artifact the pipeline emits. The Actions layer consumes ONLY this - it never re-derives anything. Produced by packages/core after the output validator has run, so every field here is already validated and safe to render.",
+  "type": "object",
+  "required": [
+    "schema_version", "run_id", "repo", "pr_number", "head_sha", "base_sha",
+    "status", "verdict", "check_conclusion", "findings", "completeness", "cost", "timings"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": { "const": "1.0" },
+    "run_id": { "type": "string" },
+    "repo": { "type": "string", "pattern": "^[^/]+/[^/]+$" },
+    "pr_number": { "type": "integer", "minimum": 1 },
+    "head_sha": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{40}$",
+      "description": "The SHA the review was COMPUTED against. The poster MUST send this as commit_id and MUST refuse to post if the live head has moved. Fixes github_write.py:141 dropping commit_id."
+    },
+    "base_sha": { "type": "string", "pattern": "^[0-9a-f]{40}$" },
+    "is_fork": {
+      "type": "boolean",
+      "description": "Head is in a fork. Strictest sandbox tier; no token reachable by the agent."
+    },
+    "status": {
+      "enum": ["complete", "incomplete", "failed"],
+      "description": "'incomplete' means the diff was truncated or dimensions timed out. An incomplete run MUST NOT emit a clean verdict."
+    },
+    "verdict": {
+      "enum": ["comment", "request_changes", "needs_discussion"],
+      "description": "NO 'approve' MEMBER BY DESIGN. A GitHub App approval counts toward required_approving_review_count, so the bot must never be able to satisfy a human-review requirement. Recomputed deterministically by core from max finding severity - never taken from model output."
+    },
+    "review_event": {
+      "const": "COMMENT",
+      "description": "The only event ever posted in v1. The merge gate is the check-run conclusion, not the review state."
+    },
+    "check_conclusion": {
+      "enum": ["success", "neutral", "failure", "action_required"],
+      "description": "The actual merge gate. Defaults to 'neutral' unless the repo opted into blocking mode. 'failure' only when blocking is enabled AND criticals exist."
+    },
+    "completeness": {
+      "type": "object",
+      "required": ["diff_truncated", "partial_dimensions", "local_checkout"],
+      "additionalProperties": false,
+      "properties": {
+        "diff_truncated": {
+          "type": "boolean",
+          "description": "True when pagination capped out or GitHub omitted a patch for a large file. Both currently look identical to a clean PR."
+        },
+        "truncation_reason": { "type": ["string", "null"] },
+        "files_seen": { "type": "integer" },
+        "files_total": { "type": ["integer", "null"] },
+        "partial_dimensions": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Surfaces that timed out or errored. Must be stated plainly in the posted body."
+        },
+        "local_checkout": { "type": "boolean" }
+      }
+    },
+    "findings": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["dedup_key", "principle_id", "rulepack_id", "severity", "surface", "message", "positionable"],
+        "additionalProperties": false,
+        "properties": {
+          "dedup_key": {
+            "type": "string",
+            "description": "Content-anchored: hash(path, principle_id, normalized_evidence). NOT position-anchored - a line-number key re-posts every finding on every push."
+          },
+          "principle_id": { "type": "string" },
+          "rulepack_id": { "type": "string" },
+          "rulepack_version": { "type": "string" },
+          "severity": { "enum": ["info", "low", "medium", "high", "critical"] },
+          "surface": { "type": "string" },
+          "enforcement": { "enum": ["established", "partial", "missing"] },
+          "advisory": {
+            "type": "boolean",
+            "description": "missing/partial rules are advisory and never drive the verdict or the check conclusion."
+          },
+          "path": {
+            "type": ["string", "null"],
+            "description": "VALIDATED: byte-equal to an entry in the PR files list. No '..', no absolute paths, no symlinks."
+          },
+          "line": { "type": ["integer", "null"], "description": "VALIDATED: present in the commentable-line set for this path." },
+          "positionable": {
+            "type": "boolean",
+            "description": "False means it goes in the summary body instead of as an inline comment."
+          },
+          "message": { "type": "string", "description": "SANITIZED: fences neutralized, raw HTML stripped, @mentions defanged." },
+          "evidence": {
+            "type": ["string", "null"],
+            "description": "SANITIZED. This is attacker-authored source text; it is rendered into a fenced block, so a triple backtick here escapes the fence."
+          },
+          "headline": { "type": ["string", "null"] },
+          "dedup_verdict": { "enum": ["new", "same_finding_same_state", "same_finding_resolved"] }
+        }
+      }
+    },
+    "summary_markdown": { "type": "string", "description": "SANITIZED model prose." },
+    "risk": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "score": { "type": "number" },
+        "band": { "enum": ["low", "medium", "high", "critical"] }
+      }
+    },
+    "cost": {
+      "type": "object",
+      "required": ["total_usd"],
+      "additionalProperties": false,
+      "properties": {
+        "total_usd": { "type": "number" },
+        "per_surface_usd": { "type": "object", "additionalProperties": { "type": "number" } },
+        "model": { "type": "string" },
+        "budget_exceeded": { "type": "boolean" }
+      }
+    },
+    "timings": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "total_seconds": { "type": "number" },
+        "per_stage_seconds": { "type": "object", "additionalProperties": { "type": "number" } }
+      }
+    },
+    "connectors": {
+      "type": "object",
+      "description": "Per-adapter outcome. 'unconfigured' is the default and is never an error.",
+      "additionalProperties": { "enum": ["unconfigured", "skipped", "ok", "failed"] }
+    },
+    "errors": { "type": "array", "items": { "type": "string" } }
+  }
+}

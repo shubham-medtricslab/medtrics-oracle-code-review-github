@@ -1,0 +1,19 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "aireview"
+version = "0.1.0"
+description = "Repo-agnostic AI code review core. Parent-driven pipeline; the LLM is a leaf call."
+requires-python = ">=3.10"
+# INTENTIONALLY EMPTY. packages/core is stdlib-only, enforced by
+# tools/stdlib_lint.py in CI. Third-party deps may only appear in action/ tooling.
+dependencies = []
+
+[project.scripts]
+aireview = "aireview.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["aireview*"]

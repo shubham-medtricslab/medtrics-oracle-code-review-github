@@ -1,0 +1,12 @@
+# Deliberate, reviewed departures from contracts/golden-rubric.tsv.
+# The ONLY differences `tools/golden_snapshot.py verify` tolerates.
+#
+# Format: id<TAB>column<TAB>old<TAB>new<TAB>reason
+#
+# Anything not listed here is a regression, not a decision.
+#
+# Note: detector-level fixes (e.g. the FA-010 inverted predicate, which fires on
+# *.service.ts - the one legitimate case - because detectors.py:68 bound it to
+# _is_ts with no exclusion) do NOT appear in this file. They change detector
+# behaviour, not rule attributes. They are covered by the detector parity test
+# instead, which v0.5.0 had none of.

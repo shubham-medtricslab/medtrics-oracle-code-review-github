@@ -1,0 +1,136 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://medtrics.internal/ai-code-review/contracts/rulepack.schema.json",
+  "title": "Rulepack",
+  "description": "FROZEN CONTRACT v1. A rulepack contributes rules, overrides and detectors into one shared global ID namespace. The three resolution layers (category defaults, overrides, enforcement cap) are owned by packages/core, NOT by packs. Packs never carry filesystem paths.",
+  "type": "object",
+  "required": ["id", "version", "rules"],
+  "additionalProperties": false,
+  "properties": {
+    "id": {
+      "type": "string",
+      "pattern": "^[a-z0-9][a-z0-9-]*$",
+      "description": "Pack identifier, e.g. 'supabase-rls'. Resolved by ID against the core registry; never a path."
+    },
+    "version": {
+      "type": "string",
+      "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$"
+    },
+    "description": { "type": "string" },
+    "requires": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Pack IDs this pack depends on. Core resolves order; cycles are rejected."
+    },
+    "categories": {
+      "type": "object",
+      "description": "Category default table contributed by this pack. Key is category id. Core merges these; a category may be declared by exactly one pack.",
+      "additionalProperties": {
+        "type": "object",
+        "required": ["name", "prefix", "default_surface", "default_severity", "default_diff_checkable"],
+        "additionalProperties": false,
+        "properties": {
+          "name": { "type": "string" },
+          "prefix": { "type": "string", "pattern": "^[A-Z0-9]+$" },
+          "default_surface": { "$ref": "#/$defs/surface" },
+          "default_severity": { "$ref": "#/$defs/severity" },
+          "default_diff_checkable": { "$ref": "#/$defs/diffCheckable" }
+        }
+      }
+    },
+    "rules": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "category", "title", "enforcement"],
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[A-Z0-9]+-[0-9]{3}$",
+            "description": "Globally unique across ALL packs. Duplicate IDs across packs are a hard validation error."
+          },
+          "category": { "type": "string" },
+          "title": { "type": "string" },
+          "enforcement": { "enum": ["established", "partial", "missing"] },
+          "severity": {
+            "$ref": "#/$defs/severity",
+            "description": "Optional override of the category default. Core still applies the enforcement cap AFTER this."
+          },
+          "surface": { "$ref": "#/$defs/surface" },
+          "diff_checkable": { "$ref": "#/$defs/diffCheckable" },
+          "detect": { "type": "string", "description": "Guidance text handed to the reviewer agent." }
+        }
+      }
+    },
+    "detectors": {
+      "type": "array",
+      "description": "Deterministic pre-screeners. Declarative only: no Python predicates.",
+      "items": {
+        "type": "object",
+        "required": ["key", "emits_principle_id", "severity", "pattern", "message"],
+        "additionalProperties": false,
+        "properties": {
+          "key": {
+            "type": "string",
+            "description": "Unique detector key. MUST NOT be used to derive the emitted principle id - that is why emits_principle_id exists. Fixes the FA-009b collision where detectors.py:104 stripped a 'b' suffix in Python."
+          },
+          "emits_principle_id": {
+            "type": "string",
+            "pattern": "^[A-Z0-9]+-[0-9]{3}$",
+            "description": "Explicit. Never derived from key."
+          },
+          "severity": { "$ref": "#/$defs/severity" },
+          "pattern": { "type": "string", "description": "Python re syntax, applied to ADDED lines only." },
+          "flags": {
+            "type": "array",
+            "items": { "enum": ["IGNORECASE", "MULTILINE", "DOTALL"] }
+          },
+          "include_globs": {
+            "type": "array",
+            "items": { "type": "string" },
+            "description": "Path must match at least one. Replaces the _is_ts/_is_tsx/_is_sql Python predicates."
+          },
+          "exclude_globs": {
+            "type": "array",
+            "items": { "type": "string" },
+            "description": "Path must match none. Required to express FA-010 correctly: it targets Supabase imports OUTSIDE services, so services must be excluded. detectors.py:68 bound it to _is_ts with no exclusion, firing on the one legitimate case."
+          },
+          "message": { "type": "string" }
+        }
+      }
+    },
+    "surface_path_globs": {
+      "type": "object",
+      "description": "Which reviewer surfaces a changed path activates.",
+      "additionalProperties": { "type": "array", "items": { "type": "string" } }
+    },
+    "severity_floors": {
+      "type": "object",
+      "description": "Per-surface severity floor contributed by this pack, e.g. rls -> high.",
+      "additionalProperties": { "$ref": "#/$defs/severity" }
+    },
+    "overlays": {
+      "type": "object",
+      "description": "Domain overlays keyed by domain id, with path prefixes that resolve to them.",
+      "additionalProperties": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "path_prefixes": { "type": "array", "items": { "type": "string" } },
+          "guidance": { "type": "string" }
+        }
+      }
+    }
+  },
+  "$defs": {
+    "severity": { "enum": ["info", "low", "medium", "high", "critical"] },
+    "surface": {
+      "enum": [
+        "frontend", "typescript", "data_layer", "rls", "edge_function",
+        "security_privacy", "ux_a11y", "i18n_rtl", "risk", "process"
+      ]
+    },
+    "diffCheckable": { "enum": ["yes", "checkout", "repo", "process"] }
+  }
+}
