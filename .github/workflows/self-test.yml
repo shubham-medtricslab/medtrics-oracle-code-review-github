@@ -183,18 +183,28 @@ jobs:
       # check still runs here, because it compares the packs against the
       # snapshot committed in contracts/ rather than against the legacy source.
       - name: Run every gate
-        run: ./run-gates.sh
+        run: |
+          set -euo pipefail
+          # Captured rather than piped. `grep -q` exits on first match and
+          # closes the pipe, which SIGPIPEs the producer; under `pipefail`
+          # that reads as a failed suite. Running it once into a file also
+          # avoids paying for the whole suite twice to check one string.
+          ./run-gates.sh 2>&1 | tee /tmp/gates.log
 
       - name: The legacy-dependent gates were skipped, not silently passed
         run: |
           set -euo pipefail
           # A skip that looks like a pass is how a gate stops being a gate.
-          # Assert the skip is announced rather than trusting it happened.
-          if ! ./run-gates.sh 2>&1 | grep -q 'SKIPPED (no legacy at'; then
+          # Assert the skip was announced rather than trusting it happened.
+          if ! grep -q 'SKIPPED (no legacy at' /tmp/gates.log; then
             echo "::error::expected the legacy-dependent gates to report SKIPPED"
             exit 1
           fi
-          echo "ok: legacy gates skipped explicitly, and said so"
+          if ! grep -q 'ALL GATES PASSED' /tmp/gates.log; then
+            echo "::error::gate suite did not report ALL GATES PASSED"
+            exit 1
+          fi
+          echo "ok: legacy gates skipped explicitly, everything else passed"
 
   fixture:
     name: Fixture rendering
