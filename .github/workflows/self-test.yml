@@ -161,6 +161,41 @@ jobs:
           print(f"ok: {len(local)} action scripts, stdlib only")
           PY
 
+  gates:
+    name: Full gate suite
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      # The `unit` job covers action/tests. This covers everything else: the
+      # core suites, the rulepack suites, contract parsing, and the rulepack
+      # golden-parity check. Without it roughly three quarters of the suite
+      # would run only on a developer's machine - and that three quarters is
+      # where the rulepack split and the write-path fixes actually live.
+      #
+      # run-gates.sh skips the two checks needing the legacy v0.5.0 plugin
+      # checked out beside this repo. Those stay a local gate. The pack/golden
+      # check still runs here, because it compares the packs against the
+      # snapshot committed in contracts/ rather than against the legacy source.
+      - name: Run every gate
+        run: ./run-gates.sh
+
+      - name: The legacy-dependent gates were skipped, not silently passed
+        run: |
+          set -euo pipefail
+          # A skip that looks like a pass is how a gate stops being a gate.
+          # Assert the skip is announced rather than trusting it happened.
+          if ! ./run-gates.sh 2>&1 | grep -q 'SKIPPED (no legacy at'; then
+            echo "::error::expected the legacy-dependent gates to report SKIPPED"
+            exit 1
+          fi
+          echo "ok: legacy gates skipped explicitly, and said so"
+
   fixture:
     name: Fixture rendering
     runs-on: ubuntu-latest
